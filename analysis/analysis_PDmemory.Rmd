@@ -10,8 +10,8 @@ output: html_document
 
 #options for all chunks
 knitr::opts_chunk$set(echo = FALSE) #reflect code in resulting markdown
-knitr::opts_chunk$set(cache = TRUE) #caching
-knitr::opts_chunk$set(autodep = TRUE) #to remove error for caching in mardown result 
+knitr::opts_chunk$set(cache = FALSE) #caching
+#knitr::opts_chunk$set(autodep = TRUE) #to remove error for caching in mardown result 
 knitr::opts_chunk$set(warning = FALSE)
 knitr::opts_knit$set(root.dir = "..") ##set root dir to project folder
 
