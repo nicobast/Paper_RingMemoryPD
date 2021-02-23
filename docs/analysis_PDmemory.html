@@ -1,0 +1,1866 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Nico Bast" />
+
+
+<title>Analysis</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Paper_RingMemoryPD</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Analysis</h1>
+<h4 class="author">Nico Bast</h4>
+<h4 class="date">23 2 2021</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-02-23
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>Paper_RingMemoryPD/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20210216code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20210216)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20210216code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20210216)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongdetected"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>Cache:</strong> detected </a>
+</p>
+</div>
+<div id="strongCachestrongdetected" class="panel-collapse collapse">
+<div class="panel-body">
+The following chunks had caches available:
+<ul>
+<li>
+accuracy_between_groups
+</li>
+<li>
+distribution_PD
+</li>
+<li>
+EEPR
+</li>
+<li>
+effects_on_accuracy_logistic_regression
+</li>
+<li>
+effects_on_accuracy_separate_models
+</li>
+<li>
+figure EEPR
+</li>
+<li>
+figure_effects_on_accuracy_posthoc
+</li>
+<li>
+figure_preprocessed_data
+</li>
+<li>
+load_preprocessed_data
+</li>
+<li>
+remember_vs_notremember
+</li>
+<li>
+sample_description
+</li>
+<li>
+SEPR
+</li>
+<li>
+SEPR_figure
+</li>
+<li>
+session-info-chunk-inserted-by-workflowr
+</li>
+</ul>
+<p>To ensure reproducibility of the results, delete the cache directory <code>analysis_PDmemory_cache</code> and re-run the analysis. To have workflowr automatically delete the cache directory prior to building the file, set <code>delete_cache = TRUE</code> when running <code>wflow_build()</code> or <code>wflow_publish()</code>.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong0304fef"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 0304fef </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrong0304fef" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version 0304fef. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/analysis_PDmemory_cache/
+
+Untracked files:
+    Untracked:  .PowerFolder/
+    Untracked:  code/analysis_RingPD.R
+    Untracked:  code/analysis_RingPD_020720.R
+    Untracked:  code/analysis_RingPD_021220.R
+    Untracked:  code/analysis_encoding_RingPD.R
+    Untracked:  data/coding file eye RK.xlsx
+    Untracked:  data/encoding_df_200120.Rdata
+    Untracked:  data/main_df_120819.Rdata
+    Untracked:  data/main_df_preprocessed_220221.Rdata
+    Untracked:  data/raw_df_encoding_170120.Rdata
+    Untracked:  desktop.ini
+    Untracked:  manuscript/
+    Untracked:  output/figure1_concept_NE_effects.png
+    Untracked:  output/figure3_histogram_heatmap.tiff
+    Untracked:  output/figure4_encodingeffect_group.tiff
+    Untracked:  output/figure5_memoryeffect_group.tiff
+    Untracked:  output/figure6_PDeffects_on_Acc.tiff
+    Untracked:  output/old/
+    Untracked:  output/supplements_table3.pdf
+    Untracked:  output/supplements_table4.pdf
+    Untracked:  output/table1_sampledescription.pdf
+    Untracked:  output/table2_model_logistic_regression.pdf
+    Untracked:  project_init_workflow_RingMemoryPD.R
+    Untracked:  ~$ructure_manuscript.docx
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/analysis_PDmemory.Rmd</code>) and HTML (<code>docs/analysis_PDmemory.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+0304fef
+</td>
+<td>
+nicobast
+</td>
+<td>
+2021-02-23
+</td>
+<td>
+Publish the initial files for myproject
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="load-preprocessed-data" class="section level1">
+<h1>Load preprocessed data</h1>
+<pre><code> [1] &quot;data_modality&quot;   &quot;df&quot;              &quot;df_demo&quot;         &quot;df_enc&quot;         
+ [5] &quot;df_trial&quot;        &quot;df_trial_enc&quot;    &quot;df_trial_old&quot;    &quot;folder_to_data&quot; 
+ [9] &quot;home_path&quot;       &quot;path_to_data&quot;    &quot;path_to_project&quot;</code></pre>
+</div>
+<div id="figure-3-preprocessed-data" class="section level1">
+<h1>figure 3: preprocessed data</h1>
+<pre><code>png 
+  2 </code></pre>
+<p><img src="figure/analysis_PDmemory.Rmd/figure_preprocessed_data-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="sample-description" class="section level1">
+<h1>Sample description</h1>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 1. Sample description
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;" colspan="1">
+</th>
+<th style="padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3">
+<div style="border-bottom: 1px solid #111111; margin-bottom: -1px; ">
+ASD (21m, 3f)
+</div>
+</th>
+<th style="padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3">
+<div style="border-bottom: 1px solid #111111; margin-bottom: -1px; ">
+TD (23m, 7f)
+</div>
+</th>
+<th style="padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #111111; margin-bottom: -1px; ">
+difference
+</div>
+</th>
+<th style="padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #111111; margin-bottom: -1px; ">
+effect size
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+mean
+</th>
+<th style="text-align:right;">
+SD
+</th>
+<th style="text-align:left;">
+range
+</th>
+<th style="text-align:right;">
+mean
+</th>
+<th style="text-align:right;">
+SD
+</th>
+<th style="text-align:left;">
+range
+</th>
+<th style="text-align:left;">
+F
+</th>
+<th style="text-align:left;">
+p
+</th>
+<th style="text-align:left;">
+d
+</th>
+<th style="text-align:left;">
+CI-95%
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+age
+</td>
+<td style="text-align:right;">
+41.83
+</td>
+<td style="text-align:right;">
+11.56
+</td>
+<td style="text-align:left;">
+26.59 - 64.23
+</td>
+<td style="text-align:right;">
+43.98
+</td>
+<td style="text-align:right;">
+12.69
+</td>
+<td style="text-align:left;">
+22.46 - 65.14
+</td>
+<td style="text-align:left;">
+0.41
+</td>
+<td style="text-align:left;">
+0.52
+</td>
+<td style="text-align:left;">
+0.18
+</td>
+<td style="text-align:left;">
+-0.36 , 0.72
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VIQ
+</td>
+<td style="text-align:right;">
+110.17
+</td>
+<td style="text-align:right;">
+14.33
+</td>
+<td style="text-align:left;">
+81 - 130
+</td>
+<td style="text-align:right;">
+113.27
+</td>
+<td style="text-align:right;">
+14.01
+</td>
+<td style="text-align:left;">
+82 - 139
+</td>
+<td style="text-align:left;">
+0.64
+</td>
+<td style="text-align:left;">
+0.43
+</td>
+<td style="text-align:left;">
+0.22
+</td>
+<td style="text-align:left;">
+-0.32 , 0.76
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PIQ
+</td>
+<td style="text-align:right;">
+106.46
+</td>
+<td style="text-align:right;">
+15.22
+</td>
+<td style="text-align:left;">
+77 - 128
+</td>
+<td style="text-align:right;">
+106.20
+</td>
+<td style="text-align:right;">
+13.83
+</td>
+<td style="text-align:left;">
+75 - 136
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.95
+</td>
+<td style="text-align:left;">
+-0.02
+</td>
+<td style="text-align:left;">
+-0.55 , 0.52
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FIQ
+</td>
+<td style="text-align:right;">
+110.04
+</td>
+<td style="text-align:right;">
+14.72
+</td>
+<td style="text-align:left;">
+81 - 133
+</td>
+<td style="text-align:right;">
+110.10
+</td>
+<td style="text-align:right;">
+13.45
+</td>
+<td style="text-align:left;">
+77 - 135
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.99
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+-0.54 , 0.55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AQ
+</td>
+<td style="text-align:right;">
+36.04
+</td>
+<td style="text-align:right;">
+6.31
+</td>
+<td style="text-align:left;">
+22 - 47
+</td>
+<td style="text-align:right;">
+14.97
+</td>
+<td style="text-align:right;">
+6.66
+</td>
+<td style="text-align:left;">
+1 - 26
+</td>
+<td style="text-align:left;">
+139.98
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+-3.3
+</td>
+<td style="text-align:left;">
+-4.38 , -2.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+recognition accuracy
+</td>
+<td style="text-align:right;">
+0.74
+</td>
+<td style="text-align:right;">
+0.16
+</td>
+<td style="text-align:left;">
+0.25 - 0.95
+</td>
+<td style="text-align:right;">
+0.85
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+<td style="text-align:left;">
+0.5 - 1
+</td>
+<td style="text-align:left;">
+6.1
+</td>
+<td style="text-align:left;">
+0.02
+</td>
+<td style="text-align:left;">
+0.77
+</td>
+<td style="text-align:left;">
+0.11 , 1.41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BPS encoding
+</td>
+<td style="text-align:right;">
+2.85
+</td>
+<td style="text-align:right;">
+0.37
+</td>
+<td style="text-align:left;">
+2.27 - 3.8
+</td>
+<td style="text-align:right;">
+2.76
+</td>
+<td style="text-align:right;">
+0.33
+</td>
+<td style="text-align:left;">
+2.06 - 3.52
+</td>
+<td style="text-align:left;">
+0.8
+</td>
+<td style="text-align:left;">
+0.38
+</td>
+<td style="text-align:left;">
+-0.26
+</td>
+<td style="text-align:left;">
+-0.82 , 0.31
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BPS retrieval
+</td>
+<td style="text-align:right;">
+3.07
+</td>
+<td style="text-align:right;">
+0.38
+</td>
+<td style="text-align:left;">
+2.46 - 3.91
+</td>
+<td style="text-align:right;">
+2.99
+</td>
+<td style="text-align:right;">
+0.36
+</td>
+<td style="text-align:left;">
+2.21 - 3.84
+</td>
+<td style="text-align:left;">
+0.55
+</td>
+<td style="text-align:left;">
+0.46
+</td>
+<td style="text-align:left;">
+-0.21
+</td>
+<td style="text-align:left;">
+-0.74 , 0.34
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EEPR
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:left;">
+-0.02 - 0.01
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:left;">
+-0.02 - 0.02
+</td>
+<td style="text-align:left;">
+2.22
+</td>
+<td style="text-align:left;">
+0.14
+</td>
+<td style="text-align:left;">
+0.46
+</td>
+<td style="text-align:left;">
+-0.16 , 1.07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SEPR
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:left;">
+-0.04 - 0.09
+</td>
+<td style="text-align:right;">
+0.02
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:left;">
+-0.06 - 0.07
+</td>
+<td style="text-align:left;">
+0.04
+</td>
+<td style="text-align:left;">
+0.84
+</td>
+<td style="text-align:left;">
+-0.06
+</td>
+<td style="text-align:left;">
+-0.66 , 0.53
+</td>
+</tr>
+</tbody>
+</table>
+<pre><code>Note that HTML color may not be displayed on PDF properly.</code></pre>
+<pre><code>save_kable will have the best result with magick installed. </code></pre>
+</div>
+<div id="recognition-accuracy" class="section level1">
+<h1>Recognition accuracy</h1>
+<pre><code>     Acc
+group    0    1
+  ASD 0.24 0.76
+  TD  0.15 0.85</code></pre>
+<pre><code>ASD: ASD
+   vars  n mean   sd median trimmed mad  min  max range  skew kurtosis   se
+X1    1 18 0.74 0.16   0.78    0.76 0.1 0.25 0.95   0.7 -1.64     2.81 0.04
+------------------------------------------------------------ 
+ASD: TD
+   vars  n mean   sd median trimmed  mad min max range skew kurtosis   se
+X1    1 27 0.85 0.12   0.86    0.86 0.08 0.5   1   0.5   -1     0.67 0.02</code></pre>
+<pre><code>
+    Welch Two Sample t-test
+
+data:  acc_agg by ASD
+t = -2.3525, df = 30.484, p-value = 0.02529
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.19271890 -0.01366755
+sample estimates:
+mean in group ASD  mean in group TD 
+        0.7425592         0.8457524 </code></pre>
+<pre><code>Generalized linear mixed model fit by maximum likelihood (Laplace
+  Approximation) [glmerMod]
+ Family: binomial  ( logit )
+Formula: Acc ~ group + (1 | word) + (1 | PIC)
+   Data: df_trial_old
+
+     AIC      BIC   logLik deviance df.resid 
+  1260.5   1281.3   -626.2   1252.5     1344 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.4703  0.2907  0.4013  0.5008  0.9386 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ PIC    (Intercept) 0.35056  0.5921  
+ word   (Intercept) 0.04686  0.2165  
+Number of obs: 1348, groups:  PIC, 48; word, 4
+
+Fixed effects:
+            Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)   1.1851     0.2095   5.658 1.53e-08 ***
+groupTD       0.6568     0.2345   2.801   0.0051 ** 
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Correlation of Fixed Effects:
+        (Intr)
+groupTD -0.649</code></pre>
+<pre><code>Computing profile confidence intervals ...</code></pre>
+<pre><code>                   2.5 %   97.5 %
+groupTD 1.934792 1.20925 3.158193</code></pre>
+<pre><code> contrast estimate    SE  df asymp.LCL asymp.UCL
+ TD - ASD    0.657 0.234 Inf     0.197      1.12
+
+Results are given on the log odds ratio (not the response) scale. 
+Confidence level used: 0.95 </code></pre>
+<pre><code>(Intercept)     groupTD 
+   3.271111    1.928536 </code></pre>
+</div>
+<div id="eepr-between-groups" class="section level1">
+<h1>EEPR between groups</h1>
+<div id="eepr-model-summary" class="section level2">
+<h2>EEPR model summary</h2>
+<pre><code>Type III Analysis of Variance Table with Satterthwaite&#39;s method
+      Sum Sq Mean Sq NumDF  DenDF F value  Pr(&gt;F)  
+group 3.5117  3.5117     1 42.963  4.1365 0.04817 *
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite&#39;s method [
+lmerModLmerTest]
+Formula: scale(rpd_enc) ~ group + (1 | PIC) + (1 | stimulus)
+   Data: df_trial_old
+
+REML criterion at convergence: 3520.2
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-5.5305 -0.4688  0.0216  0.5291  3.8716 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ PIC      (Intercept) 0.08577  0.2929  
+ stimulus (Intercept) 0.08261  0.2874  
+ Residual             0.84895  0.9214  
+Number of obs: 1288, groups:  PIC, 47; stimulus, 4
+
+Fixed effects:
+            Estimate Std. Error      df t value Pr(&gt;|t|)  
+(Intercept)  -0.1513     0.1663  4.9916  -0.910   0.4047  
+groupTD       0.2135     0.1049 42.9626   2.034   0.0482 *
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Correlation of Fixed Effects:
+        (Intr)
+groupTD -0.401</code></pre>
+<pre><code>Note: Use &#39;contrast(regrid(object), ...)&#39; to obtain contrasts of back-transformed estimates</code></pre>
+<pre><code> contrast estimate    SE   df lower.CL upper.CL
+ ASD - TD   -0.213 0.105 43.9   -0.425  -0.0018
+
+Note: contrasts are still on the scale scale 
+Degrees-of-freedom method: kenward-roger 
+Confidence level used: 0.95 </code></pre>
+<pre><code>Type III Analysis of Variance Table with Satterthwaite&#39;s method
+        Sum Sq  Mean Sq NumDF  DenDF F value Pr(&gt;F)
+group 0.024039 0.024039     1 50.998  0.3008 0.5858</code></pre>
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite&#39;s method [
+lmerModLmerTest]
+Formula: scale(pd) ~ group + (1 | PIC) + (1 | stimulus)
+   Data: df_trial_enc
+
+REML criterion at convergence: 982.1
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.5625 -0.6088 -0.0445  0.5321  5.5607 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ PIC      (Intercept) 0.955917 0.97771 
+ stimulus (Intercept) 0.003005 0.05482 
+ Residual             0.079927 0.28271 
+Number of obs: 2076, groups:  PIC, 53; stimulus, 4
+
+Fixed effects:
+            Estimate Std. Error       df t value Pr(&gt;|t|)
+(Intercept)  0.08958    0.20592 52.53322   0.435    0.665
+group2      -0.14877    0.27126 50.99787  -0.548    0.586
+
+Correlation of Fixed Effects:
+       (Intr)
+group2 -0.746</code></pre>
+</div>
+<div id="figure-4-eepr" class="section level2">
+<h2>figure 4: EEPR</h2>
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+<pre><code>png 
+  2 </code></pre>
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+<p><img src="figure/analysis_PDmemory.Rmd/figure EEPR-1.png" width="864" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="sepr-between-groups" class="section level1">
+<h1>SEPR between groups</h1>
+<div id="sepr-model-summary" class="section level2">
+<h2>SEPR model summary</h2>
+<pre><code>Type III Analysis of Variance Table with Satterthwaite&#39;s method
+             Sum Sq Mean Sq NumDF   DenDF F value    Pr(&gt;F)    
+group         0.285   0.285     1   51.49  0.3468   0.55849    
+oldnew       50.663  50.663     1 2599.20 61.5456 6.265e-15 ***
+group:oldnew  4.085   4.085     1 2597.51  4.9624   0.02599 *  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite&#39;s method [
+lmerModLmerTest]
+Formula: scale(rpd_response) ~ group * oldnew + (1 | PIC) + (1 | word)
+   Data: df_trial
+
+REML criterion at convergence: 7134.2
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.9902 -0.6154 -0.0962  0.5322  5.0611 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ PIC      (Intercept) 0.164038 0.40502 
+ word     (Intercept) 0.003448 0.05872 
+ Residual             0.823180 0.90729 
+Number of obs: 2646, groups:  PIC, 54; word, 4
+
+Fixed effects:
+                    Estimate Std. Error         df t value Pr(&gt;|t|)    
+(Intercept)         -0.09244    0.09503   51.92315  -0.973 0.335238    
+groupTD             -0.01133    0.12122   58.73427  -0.093 0.925855    
+oldnewold            0.20294    0.05353 2597.53727   3.791 0.000153 ***
+groupTD:oldnewold    0.16082    0.07220 2597.51340   2.228 0.025990 *  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Correlation of Fixed Effects:
+            (Intr) gropTD oldnwl
+groupTD     -0.709              
+oldnewold   -0.248  0.194       
+grpTD:ldnwl  0.184 -0.256 -0.741</code></pre>
+<pre><code>Note: Use &#39;contrast(regrid(object), ...)&#39; to obtain contrasts of back-transformed estimates</code></pre>
+<pre><code> contrast estimate    SE df lower.CL upper.CL
+ 1 - 2       0.149 0.271 51   -0.396    0.693
+
+Note: contrasts are still on the scale scale 
+Degrees-of-freedom method: kenward-roger 
+Confidence level used: 0.95 </code></pre>
+<pre><code>Computing profile confidence intervals ...</code></pre>
+<pre><code>              2.5 % 97.5 %
+oldnewold 0.2   0.1   0.31</code></pre>
+<pre><code>Note: Use &#39;contrast(regrid(object), ...)&#39; to obtain contrasts of back-transformed estimates</code></pre>
+<pre><code>group = ASD:
+ contrast  estimate     SE   df lower.CL upper.CL
+ old - new    0.203 0.0535 2598    0.098    0.308
+
+group = TD:
+ contrast  estimate     SE   df lower.CL upper.CL
+ old - new    0.364 0.0485 2600    0.269    0.459
+
+Note: contrasts are still on the scale scale 
+Degrees-of-freedom method: kenward-roger 
+Confidence level used: 0.95 </code></pre>
+<pre><code>Type III Analysis of Variance Table with Satterthwaite&#39;s method
+        Sum Sq  Mean Sq NumDF  DenDF F value Pr(&gt;F)
+group 0.033944 0.033944     1 51.984  0.3682 0.5466</code></pre>
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite&#39;s method [
+lmerModLmerTest]
+Formula: scale(pd) ~ group + (1 | PIC) + (1 | word)
+   Data: df_trial
+
+REML criterion at convergence: 1936.2
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-4.6910 -0.6422 -0.0648  0.5582  9.6756 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ PIC      (Intercept) 1.002762 1.00138 
+ word     (Intercept) 0.001355 0.03681 
+ Residual             0.092196 0.30364 
+Number of obs: 3469, groups:  PIC, 54; word, 4
+
+Fixed effects:
+            Estimate Std. Error      df t value Pr(&gt;|t|)
+(Intercept)   0.1158     0.2054 52.7552   0.564    0.575
+groupTD      -0.1665     0.2744 51.9843  -0.607    0.547
+
+Correlation of Fixed Effects:
+        (Intr)
+groupTD -0.742</code></pre>
+</div>
+<div id="figure-5-sepr" class="section level2">
+<h2>figure 5: SEPR</h2>
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+<pre><code>png 
+  2 </code></pre>
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+<p><img src="figure/analysis_PDmemory.Rmd/SEPR_figure-1.png" width="864" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="effects-on-recognition-accuracy" class="section level1">
+<h1>Effects on recognition accuracy</h1>
+<pre><code>Note that HTML color may not be displayed on PDF properly.</code></pre>
+<pre><code>save_kable will have the best result with magick installed. </code></pre>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 2. Logistic regression: EEPR and SEPR effect on recognition accuracy
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std error
+</th>
+<th style="text-align:right;">
+z-value
+</th>
+<th style="text-align:right;">
+p-value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+intercept
+</td>
+<td style="text-align:right;">
+1.295
+</td>
+<td style="text-align:right;">
+0.252
+</td>
+<td style="text-align:right;">
+5.144
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EEPR (z)
+</td>
+<td style="text-align:right;">
+-0.394
+</td>
+<td style="text-align:right;">
+0.152
+</td>
+<td style="text-align:right;">
+-2.598
+</td>
+<td style="text-align:right;">
+0.009
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SEPR (z)
+</td>
+<td style="text-align:right;">
+0.316
+</td>
+<td style="text-align:right;">
+0.169
+</td>
+<td style="text-align:right;">
+1.871
+</td>
+<td style="text-align:right;">
+0.061
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+group (TD)
+</td>
+<td style="text-align:right;">
+0.616
+</td>
+<td style="text-align:right;">
+0.278
+</td>
+<td style="text-align:right;">
+2.215
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EEPR x SEPR
+</td>
+<td style="text-align:right;">
+-0.444
+</td>
+<td style="text-align:right;">
+0.178
+</td>
+<td style="text-align:right;">
+-2.492
+</td>
+<td style="text-align:right;">
+0.013
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EEPR x group
+</td>
+<td style="text-align:right;">
+0.524
+</td>
+<td style="text-align:right;">
+0.207
+</td>
+<td style="text-align:right;">
+2.524
+</td>
+<td style="text-align:right;">
+0.012
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SEPR x group
+</td>
+<td style="text-align:right;">
+-0.474
+</td>
+<td style="text-align:right;">
+0.215
+</td>
+<td style="text-align:right;">
+-2.204
+</td>
+<td style="text-align:right;">
+0.028
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EEPR x SEPR x group
+</td>
+<td style="text-align:right;">
+0.542
+</td>
+<td style="text-align:right;">
+0.229
+</td>
+<td style="text-align:right;">
+2.366
+</td>
+<td style="text-align:right;">
+0.018
+</td>
+</tr>
+</tbody>
+</table>
+<pre><code>group = ASD:
+ rpd_enc_scaled rpd_response_scaled.trend    SE  df asymp.LCL asymp.UCL
+             -2                    1.2046 0.417 Inf     0.387     2.022
+             -1                    0.7603 0.264 Inf     0.244     1.277
+              0                    0.3160 0.169 Inf    -0.015     0.647
+              1                   -0.1282 0.226 Inf    -0.571     0.315
+              2                   -0.5725 0.370 Inf    -1.298     0.153
+
+group = TD:
+ rpd_enc_scaled rpd_response_scaled.trend    SE  df asymp.LCL asymp.UCL
+             -2                   -0.3529 0.311 Inf    -0.962     0.256
+             -1                   -0.2553 0.190 Inf    -0.628     0.118
+              0                   -0.1576 0.133 Inf    -0.418     0.102
+              1                   -0.0600 0.201 Inf    -0.455     0.335
+              2                    0.0377 0.324 Inf    -0.598     0.673
+
+Confidence level used: 0.95 </code></pre>
+<pre><code>NOTE: Results may be misleading due to involvement in interactions</code></pre>
+<pre><code> group rpd_enc_scaled.trend    SE  df asymp.LCL asymp.UCL
+ ASD                 -0.378 0.151 Inf    -0.673   -0.0827
+ TD                   0.127 0.144 Inf    -0.156    0.4095
+
+Confidence level used: 0.95 </code></pre>
+<pre><code>NOTE: Results may be misleading due to involvement in interactions</code></pre>
+<pre><code> group rpd_response_scaled.trend    SE  df asymp.LCL asymp.UCL
+ ASD                       0.300 0.168 Inf   -0.0296     0.629
+ TD                       -0.154 0.133 Inf   -0.4148     0.107
+
+Confidence level used: 0.95 </code></pre>
+</div>
+<div id="figure6-three-way-interaction" class="section level1">
+<h1>figure6: three-way-interaction</h1>
+<pre><code>png 
+  2 </code></pre>
+<p><img src="figure/analysis_PDmemory.Rmd/figure_effects_on_accuracy_posthoc-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="remember-and-not-remembered-items" class="section level1">
+<h1>remember and not remembered items</h1>
+</div>
+<div id="supplements-separate-models-on-accuracy" class="section level1">
+<h1>supplements: separate models on accuracy</h1>
+<pre><code>boundary (singular) fit: see ?isSingular</code></pre>
+<pre><code>Note that HTML color may not be displayed on PDF properly.</code></pre>
+<pre><code>save_kable will have the best result with magick installed. </code></pre>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+logistic regression in ASD: EEPR and SEPR effect on recognition accuracy
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Estimate
+</th>
+<th style="text-align:right;">
+Std..Error
+</th>
+<th style="text-align:right;">
+z.value
+</th>
+<th style="text-align:right;">
+Pr…z..
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+intercept
+</td>
+<td style="text-align:right;">
+1.267
+</td>
+<td style="text-align:right;">
+0.181
+</td>
+<td style="text-align:right;">
+6.999
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EEPR
+</td>
+<td style="text-align:right;">
+-0.332
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:right;">
+-2.457
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SEPR
+</td>
+<td style="text-align:right;">
+0.317
+</td>
+<td style="text-align:right;">
+0.140
+</td>
+<td style="text-align:right;">
+2.259
+</td>
+<td style="text-align:right;">
+0.024
+</td>
+</tr>
+</tbody>
+</table>
+<pre><code>        (Intercept)      scale(rpd_enc) scale(rpd_response) 
+          0.7801563           0.4177705           0.5785712 </code></pre>
+<pre><code>        (Intercept)      scale(rpd_enc) scale(rpd_response) 
+          3.5486867           0.7175358           1.3728801 </code></pre>
+<pre><code>Computing profile confidence intervals ...</code></pre>
+<pre><code>                    2.5 %     97.5 %
+scale(rpd_enc) -0.6067587 -0.0730299</code></pre>
+<pre><code>Computing profile confidence intervals ...</code></pre>
+<pre><code>                         2.5 %    97.5 %
+scale(rpd_response) 0.04990134 0.6034071</code></pre>
+<pre><code>Note that HTML color may not be displayed on PDF properly.
+save_kable will have the best result with magick installed. </code></pre>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+logistic regression in TD: EEPR and SEPR effect on recognition accuracy
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Estimate
+</th>
+<th style="text-align:right;">
+Std..Error
+</th>
+<th style="text-align:right;">
+z.value
+</th>
+<th style="text-align:right;">
+Pr…z..
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+intercept
+</td>
+<td style="text-align:right;">
+1.960
+</td>
+<td style="text-align:right;">
+0.243
+</td>
+<td style="text-align:right;">
+8.064
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EEPR
+</td>
+<td style="text-align:right;">
+0.154
+</td>
+<td style="text-align:right;">
+0.127
+</td>
+<td style="text-align:right;">
+1.215
+</td>
+<td style="text-align:right;">
+0.224
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SEPR
+</td>
+<td style="text-align:right;">
+-0.128
+</td>
+<td style="text-align:right;">
+0.129
+</td>
+<td style="text-align:right;">
+-0.995
+</td>
+<td style="text-align:right;">
+0.320
+</td>
+</tr>
+</tbody>
+</table>
+<pre><code>        (Intercept)      scale(rpd_enc) scale(rpd_response) 
+          0.8764893           0.5384220           0.4680658 </code></pre>
+<pre><code>        (Intercept)      scale(rpd_enc) scale(rpd_response) 
+          7.0964645           1.1664812           0.8799319 </code></pre>
+<pre><code>Computing profile confidence intervals ...</code></pre>
+<pre><code>                   2.5 %    97.5 %
+scale(rpd_enc) -0.101358 0.4083107</code></pre>
+<pre><code>Computing profile confidence intervals ...</code></pre>
+<pre><code>                         2.5 %    97.5 %
+scale(rpd_response) -0.3866226 0.1298739</code></pre>
+</div>
+<div id="supplements-data-distribution" class="section level1">
+<h1>supplements: data distribution</h1>
+<p><img src="figure/analysis_PDmemory.Rmd/distribution_PD-1.png" width="672" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre><code>R version 3.6.1 (2019-07-05)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 19041)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=German_Germany.1252  LC_CTYPE=German_Germany.1252   
+[3] LC_MONETARY=German_Germany.1252 LC_NUMERIC=C                   
+[5] LC_TIME=German_Germany.1252    
+
+attached base packages:
+[1] grid      stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] webshot_0.5.2     kableExtra_1.3.1  gridExtra_2.3     hexbin_1.28.0    
+ [5] emmeans_1.4.3.01  lmerTest_3.1-2    lme4_1.1-23       Matrix_1.2-18    
+ [9] ggplot2_3.2.1     papaja_0.1.0.9842 plyr_1.8.5        zoo_1.8-6        
+[13] readxl_1.3.1     
+
+loaded via a namespace (and not attached):
+ [1] httr_1.4.1          jsonlite_1.6        viridisLite_0.3.0  
+ [4] splines_3.6.1       statmod_1.4.34      highr_0.8          
+ [7] cellranger_1.1.0    yaml_2.2.0          numDeriv_2016.8-1.1
+[10] pillar_1.4.3        backports_1.1.5     lattice_0.20-38    
+[13] glue_1.4.2          digest_0.6.23       promises_1.1.0     
+[16] rvest_0.3.5         minqa_1.2.4         colorspace_1.4-1   
+[19] htmltools_0.4.0     httpuv_1.5.2        psych_1.9.12.31    
+[22] pkgconfig_2.0.3     purrr_0.3.3         xtable_1.8-4       
+[25] mvtnorm_1.0-11      scales_1.1.0        processx_3.4.1     
+[28] later_1.0.0         git2r_0.26.1        tibble_3.0.4       
+[31] mgcv_1.8-31         generics_0.0.2      farver_2.0.1       
+[34] ellipsis_0.3.0      withr_2.1.2         lazyeval_0.2.2     
+[37] pbkrtest_0.4-7      mnormt_1.5-5        magrittr_1.5       
+[40] crayon_1.3.4        ps_1.3.0            estimability_1.3   
+[43] evaluate_0.14       fs_1.3.1            nlme_3.1-143       
+[46] MASS_7.3-51.5       xml2_1.2.2          tools_3.6.1        
+[49] lifecycle_0.2.0     stringr_1.4.0       munsell_0.5.0      
+[52] callr_3.4.0         compiler_3.6.1      rlang_0.4.8        
+[55] nloptr_1.2.1        rstudioapi_0.10     labeling_0.3       
+[58] rmarkdown_2.0       boot_1.3-24         gtable_0.3.0       
+[61] codetools_0.2-16    R6_2.4.1            knitr_1.26         
+[64] dplyr_1.0.2         workflowr_1.6.2     rprojroot_1.3-2    
+[67] stringi_1.4.5       parallel_3.6.1      Rcpp_1.0.3         
+[70] vctrs_0.3.4         tidyselect_1.1.0    xfun_0.11          </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

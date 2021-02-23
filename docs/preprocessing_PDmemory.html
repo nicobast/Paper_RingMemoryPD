@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Nico Bast" />
+
+
+<title>Preprocessing</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Paper_RingMemoryPD</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Preprocessing</h1>
+<h4 class="author">Nico Bast</h4>
+<h4 class="date">18 2 2021</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-02-23
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>Paper_RingMemoryPD/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20210216code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20210216)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20210216code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20210216)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong0304fef"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 0304fef </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrong0304fef" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version 0304fef. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/analysis_PDmemory_cache/
+
+Untracked files:
+    Untracked:  .PowerFolder/
+    Untracked:  code/analysis_RingPD.R
+    Untracked:  code/analysis_RingPD_020720.R
+    Untracked:  code/analysis_RingPD_021220.R
+    Untracked:  code/analysis_encoding_RingPD.R
+    Untracked:  data/coding file eye RK.xlsx
+    Untracked:  data/encoding_df_200120.Rdata
+    Untracked:  data/main_df_120819.Rdata
+    Untracked:  data/main_df_preprocessed_220221.Rdata
+    Untracked:  data/raw_df_encoding_170120.Rdata
+    Untracked:  desktop.ini
+    Untracked:  manuscript/
+    Untracked:  output/figure1_concept_NE_effects.png
+    Untracked:  output/figure3_histogram_heatmap.tiff
+    Untracked:  output/figure4_encodingeffect_group.tiff
+    Untracked:  output/figure5_memoryeffect_group.tiff
+    Untracked:  output/figure6_PDeffects_on_Acc.tiff
+    Untracked:  output/old/
+    Untracked:  output/supplements_table3.pdf
+    Untracked:  output/supplements_table4.pdf
+    Untracked:  output/table1_sampledescription.pdf
+    Untracked:  output/table2_model_logistic_regression.pdf
+    Untracked:  project_init_workflow_RingMemoryPD.R
+    Untracked:  ~$ructure_manuscript.docx
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/preprocessing_PDmemory.Rmd</code>) and HTML (<code>docs/preprocessing_PDmemory.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+0304fef
+</td>
+<td>
+nicobast
+</td>
+<td>
+2021-02-23
+</td>
+<td>
+Publish the initial files for myproject
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="load-data" class="section level1">
+<h1>Load DATA</h1>
+<p>Define path to data on local machine</p>
+<pre class="r"><code>#READ PATH
+data.files&lt;-list.files(path=path_to_data, full.names=TRUE,recursive=T)
+#LOAD data
+data.file&lt;-data.files[grep(&#39;data.txt&#39;,data.files)]
+df.list&lt;-lapply(data.file,read.table,fill=T,sep=&#39;\t&#39;,header=F,dec=&#39;.&#39;,na.strings=&#39;-1&#39;)
+#--&gt; takes some time </code></pre>
+</div>
+<div id="add-data-variables" class="section level1">
+<h1>Add data variables</h1>
+<p>added variables:</p>
+<ul>
+<li>variable names</li>
+<li>ID</li>
+<li>trial</li>
+<li>trial timestamp</li>
+</ul>
+<pre class="r"><code>#GET variable names
+setwd(paste0(home_path,&#39;/PowerFolders/Paper_RingMemoryPD&#39;)) #if called outside a knit
+variables.names&lt;-read_excel(paste0(getwd(),&#39;/data/coding file eye RK.xlsx&#39;),.name_repair = &quot;minimal&quot;)
+variables.names&lt;-names(variables.names)[1:26]
+
+#ADD variable names to the data
+for(i in 1:length(df.list)){
+  names(df.list[[i]])&lt;-variables.names
+}
+
+
+#ADD ID names to the data + remove unecessary bits
+length_strings&lt;-sapply(data.file,nchar)
+id.names&lt;-sapply(data.file,substr,start=length_strings-12,stop=length_strings-8)
+id.names[grep(&#39;C&#39;,id.names)]&lt;-substr(id.names[grep(&#39;C&#39;,id.names)],1,4) #remove unncessary characters
+id.names[grep(&#39;d&#39;,id.names)]&lt;-substr(id.names[grep(&#39;d&#39;,id.names)],1,nchar(id.names[grep(&#39;d&#39;,id.names)])-1)  #remove unncessary characters
+#--&gt;later concatenate to data.frame
+
+#ADD trials variable + remove NA data
+func.trialvar&lt;-function(x){
+trials&lt;-droplevels(interaction(x$TrialId,x$word))
+x&lt;-data.frame(x,trials)
+x&lt;-x[!is.na(trials),]
+}
+df.list&lt;-lapply(df.list,func.trialvar)
+
+#ADD timestamp variable
+df.list&lt;-lapply(df.list,function(x){
+x&lt;-x[order(x$trials),] #NOTE: from here df has no overall time orientation anymore - but important for easy ts.trial
+ts.trial&lt;-as.numeric(unlist(by(x$TrialId,x$trials,seq_along)))
+x&lt;-data.frame(x,ts.trial)
+})
+
+
+print(&#39;trials per participant:&#39;)</code></pre>
+<pre><code>[1] &quot;trials per participant:&quot;</code></pre>
+<pre class="r"><code>sapply(df.list,function(x){length(unique(x$trials))})</code></pre>
+<pre><code> [1] 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80
+[26] 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80
+[51] 80 80 80 80 80 80 80</code></pre>
+</div>
+<div id="remove-low-quality-trials" class="section level1">
+<h1>Remove low quality trials</h1>
+<p>Less than 50% available eye tracking data</p>
+<pre class="r"><code>## - remove invalid trial data (less than 50% data per trial) 
+#percentage of pd data per trial
+df.datapercent&lt;-lapply(df.list,function(y){
+trial.list&lt;-split(y,y$trials)
+datapercent&lt;-sapply(trial.list,function(x){
+  dataleft&lt;-sum(!is.na(x$DiameterPupilLeftEye))/nrow(x)
+  dataright&lt;-sum(!is.na(x$DiameterPupilRightEye))/nrow(x)
+  return(c(dataleft,dataright))
+})
+datapercent&lt;-data.frame(names(trial.list),t(datapercent))
+names(datapercent)&lt;-c(&#39;trial&#39;,&#39;lefteye&#39;,&#39;righteye&#39;)
+return(datapercent)
+})
+
+names(df.datapercent)&lt;-id.names
+valid.data&lt;-lapply(df.datapercent,function(x){(x$righteye&gt;0.5)&amp;(x$lefteye&gt;0.5)})
+  #visualize valid data per eye - before preprocessing
+  # datapercent&lt;-do.call(rbind,df.datapercent)
+  # hist(datapercent$lefteye)
+  # hist(datapercent$righteye)
+
+#quality metric --&gt; excluded trials
+paste(&#39;total trials excluded:&#39;,
+      round(sum(unlist(valid.data)==FALSE)/sum(unlist(valid.data)),4)*100,
+      &#39;%&#39;)</code></pre>
+<pre><code>[1] &quot;total trials excluded: 27.34 %&quot;</code></pre>
+<pre class="r"><code>valid.data_ASD&lt;-valid.data[grep(&#39;AS&#39;,names(valid.data))]
+valid.data_TD&lt;-valid.data[grep(&#39;C&#39;,names(valid.data))]
+
+paste(&#39;ASD trials excluded:&#39;,
+      round(sum(unlist(valid.data_ASD)==FALSE)/sum(unlist(valid.data_ASD)),4)*100,
+      &#39;%&#39;)</code></pre>
+<pre><code>[1] &quot;ASD trials excluded: 28.96 %&quot;</code></pre>
+<pre class="r"><code>paste(&#39;TD trials excluded:&#39;,
+      round(sum(unlist(valid.data_TD)==FALSE)/sum(unlist(valid.data_TD)),4)*100,
+      &#39;%&#39;)</code></pre>
+<pre><code>[1] &quot;TD trials excluded: 25.92 %&quot;</code></pre>
+<pre class="r"><code>#split data by trials (results in list of trials within list of participants)
+df.list.trials&lt;-lapply(df.list,function(x){x.list&lt;-split(x,x$trials)})
+#remove trials without valid data (&lt;50% for each eye)
+df.list.valid&lt;-mapply(function(x,y){x&lt;-x[y==T]},x=df.list.trials,y=valid.data)</code></pre>
+</div>
+<div id="preprocessing-pupil-size-data" class="section level1">
+<h1>Preprocessing Pupil Size Data</h1>
+<p>on per-trial level based on <a href="https://doi.org/10.3758/s13428-018-1075-y">Kret 2018</a></p>
+<pre class="r"><code>## - PD PREPROCESSING - per trial####
+  #pd.preprocess.func &lt;-- applies Kret2018 reccomendations to data vector
+  #TO DO: improve preprocessing function: early values are omitted by rolling med
+pd.preprocess.func&lt;-function(x){
+  #PD preprocessing - according to Kret 2018 recommendations
+  
+  #define variables
+  Left_Diameter&lt;-x$DiameterPupilLeftEye
+  Right_Diameter&lt;-x$DiameterPupilRightEye
+  Left_Validity&lt;-x$ValidityLeftEye
+  Right_Validity&lt;-x$ValidityRightEye
+  RemoteTime&lt;-x$TETTime
+  
+  #contstant for MAD caluclation 
+  constant&lt;-3
+  #constant&lt;-3 #default value
+  
+  # STEP 1 - exclude invalid data ####
+  pl &lt;- ifelse((Left_Diameter&lt;2|Left_Diameter&gt;8), NA, Left_Diameter)  
+  pl &lt;- ifelse(Left_Validity&lt;=2,pl,NA)
+  pr &lt;- ifelse((Right_Diameter&lt;2|Right_Diameter&gt;8), NA, Right_Diameter)  
+  pr &lt;- ifelse(Right_Validity&lt;=2,pr,NA)
+  #table(is.na(pl))
+  #table(is.na(pr))
+  # STEP 2 - filtering ####
+  ## A) normalized dilation speed, take into account time jumps with Remotetimestamps: ####
+  #maximum change in pd compared to last and next pd measurement
+  #Left
+  pl.speed1&lt;-diff(pl)/diff(RemoteTime) #compared to last
+  pl.speed2&lt;-diff(rev(pl))/diff(rev(RemoteTime)) #compared to next
+  pl.speed1&lt;-c(NA,pl.speed1)
+  pl.speed2&lt;-c(rev(pl.speed2),NA)
+  pl.speed&lt;-pmax(pl.speed1,pl.speed2,na.rm=T)
+  rm(pl.speed1,pl.speed2)
+  #Right
+  pr.speed1&lt;-diff(pr)/diff(RemoteTime)
+  pr.speed2&lt;-diff(rev(pr))/diff(rev(RemoteTime))
+  pr.speed1&lt;-c(NA,pr.speed1)
+  pr.speed2&lt;-c(rev(pr.speed2),NA)
+  pr.speed&lt;-pmax(pr.speed1,pr.speed2,na.rm=T)
+  rm(pr.speed1,pr.speed2)
+  #median absolute deviation -SPEED
+  #constant&lt;-3
+  pl.speed.med&lt;-median(pl.speed,na.rm=T)
+  pl.mad&lt;-median(abs(pl.speed-pl.speed.med),na.rm = T)
+  pl.treshold.speed&lt;-pl.speed.med+constant*pl.mad #treshold.speed units are mm/microsecond
+  #plot(abs(pl.speed))+abline(h=pl.treshold.speed)
+  pr.speed.med&lt;-median(pr.speed,na.rm=T)
+  pr.mad&lt;-median(abs(pr.speed-pr.speed.med),na.rm = T)
+  pr.treshold.speed&lt;-pr.speed.med+constant*pr.mad #treshold.speed units are mm/microsecond
+  #plot(abs(pr.speed))+abline(h=pr.treshold.speed)
+  #correct pupil dilation for speed outliers
+  pl&lt;-ifelse(abs(pl.speed)&gt;pl.treshold.speed,NA,pl)
+  pr&lt;-ifelse(abs(pr.speed)&gt;pr.treshold.speed,NA,pr)
+  ## B) delete data around blinks - not applied ####
+  ## C) normalized dilation size - median absolute deviation -SIZE ####
+  #applies a two pass approach
+  #first pass: exclude deviation from trend line derived from all samples
+  #second pass: exclude deviation from trend line derived from samples passing first pass
+  #-_&gt; reintroduction of sample that might have been falsely excluded due to outliers
+  #estimate smooth size based on sampling rate
+  smooth.length&lt;-150 #measured in ms
+  #take sampling rate into account (300 vs. 120):
+  #smooth.size&lt;-round(smooth.length/mean(diff(RemoteTime)/1000)) #timestamp resolution in microseconds 
+  smooth.size&lt;-round(smooth.length/median(diff(RemoteTime),na.rm=T)) #timestamp resolution in milliseconds
+  is.even&lt;-function(x){x%%2==0}
+  smooth.size&lt;-ifelse(is.even(smooth.size)==T,smooth.size+1,smooth.size) #make sure to be odd value (see runmed)
+  #Left
+  pl.smooth&lt;-na.approx(pl,na.rm=F,rule=2) #impute missing values with interpolation
+  #pl.smooth&lt;-runmed(pl.smooth,k=smooth.size) #smooth algorithm by running median of 15 * 3.3ms 
+  if(sum(!is.na(pl.smooth))!=0){pl.smooth&lt;-runmed(pl.smooth,k=smooth.size)} #run smooth algo only if not all elements == NA 
+  pl.mad&lt;-median(abs(pl-pl.smooth),na.rm=T)
+  #Right
+  pr.smooth&lt;-na.approx(pr,na.rm=F,rule=2) #impute missing values with interpolation
+  #pr.smooth&lt;-runmed(pr.smooth,k=smooth.size) #smooth algorithm by running median of 15 * 3.3ms 
+  if(sum(!is.na(pr.smooth))!=0){pr.smooth&lt;-runmed(pr.smooth,k=smooth.size)} #run smooth algo only if not all elements == NA 
+  pr.mad&lt;-median(abs(pr-pr.smooth),na.rm=T)
+  #correct pupil dilation for size outliers - FIRST pass
+  pl.pass1&lt;-ifelse((pl&gt;pl.smooth+constant*pl.mad)|(pl&lt;pl.smooth-constant*pl.mad),NA,pl)
+  pr.pass1&lt;-ifelse((pr&gt;pr.smooth+constant*pr.mad)|(pr&lt;pr.smooth-constant*pr.mad),NA,pr)
+  #Left
+  pl.smooth&lt;-na.approx(pl.pass1,na.rm=F,rule=2) #impute missing values with interpolation
+  #pl.smooth&lt;-runmed(pl.smooth,k=smooth.size) #smooth algorithm by running median of 15 * 3.3ms 
+  if(sum(!is.na(pl.smooth))!=0){pl.smooth&lt;-runmed(pl.smooth,k=smooth.size)} #run smooth algo only if not all elements == NA 
+  pl.mad&lt;-median(abs(pl-pl.smooth),na.rm=T)
+  #Right
+  pr.smooth&lt;-na.approx(pr.pass1,na.rm=F,rule=2) #impute missing values with interpolation
+  #pr.smooth&lt;-runmed(pr.smooth,k=smooth.size) #smooth algorithm by running median of 15 * 3.3ms 
+  if(sum(!is.na(pr.smooth))!=0){pr.smooth&lt;-runmed(pr.smooth,k=smooth.size)} #run smooth algo only if not all elements == NA 
+  pr.mad&lt;-median(abs(pr-pr.smooth),na.rm=T)
+  #correct pupil dilation for size outliers - SECOND pass
+  pl.pass2&lt;-ifelse((pl&gt;pl.smooth+constant*pl.mad)|(pl&lt;pl.smooth-constant*pl.mad),NA,pl)
+  pr.pass2&lt;-ifelse((pr&gt;pr.smooth+constant*pr.mad)|(pr&lt;pr.smooth-constant*pr.mad),NA,pr)
+  pl&lt;-pl.pass2
+  pr&lt;-pr.pass2
+  
+  ## D) sparsity filter - not applied ####
+  # STEP 3 - processing valid samples  ####
+  #take offset between left and right into account
+  pd.offset&lt;-pl-pr  
+  pd.offset&lt;-na.approx(pd.offset,rule=2)
+  #mean pupil dilation across both eyes
+  pl &lt;- ifelse(is.na(pl)==FALSE, pl, pr+pd.offset)  
+  pr &lt;- ifelse(is.na(pr)==FALSE, pr, pl-pd.offset)  
+  pd &lt;- (pl+pr)/2
+  # end of function --&gt; return ####
+  #detach(x)
+  return(pd)
+}
+
+#pd is ordered by ascending trials, but allows combine with ordered df from above
+pd.list&lt;-lapply(df.list.valid,function(x){lapply(x,pd.preprocess.func)})
+#map pd data to dataframe list - double mapply required as list of trials is nested in list of participants
+df.list&lt;-mapply(function(x,y){mapply(data.frame,x,y,SIMPLIFY = F)},x=df.list.valid,y=pd.list)
+#change variable name to PD for all lists
+df.list&lt;-lapply(df.list,function(x){lapply(x,function(y){names(y)[29]&lt;-&#39;pd&#39;;return(y)})})
+df&lt;-lapply(df.list,rbind.fill) #collapse to dfs per participant
+names(df)&lt;-id.names
+
+hist(sapply(df,function(x){sum(is.na(x$pd)==F)}),main=&#39;pupil size samples per participant after preprocessing&#39;,xlab=&#39;&#39;,col=&#39;grey&#39;)</code></pre>
+<p><img src="figure/preprocessing_PDmemory.Rmd/pd_preprocessing-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="manual-repair" class="section level1">
+<h1>manual repair</h1>
+<pre class="r"><code>## - manually repair data structure of participant AS205 ####
+
+df[[&#39;AS205&#39;]]&lt;-df[[&#39;AS205&#39;]][,1:31]
+df[[&#39;AS205&#39;]]&lt;-df[[&#39;AS205&#39;]][,-c(27,28)]
+names(df[[&#39;AS205&#39;]])[27:29]&lt;-c(&#39;trials&#39;,&#39;ts.trial&#39;,&#39;pd&#39;)</code></pre>
+</div>
+<div id="create-dataframe" class="section level1">
+<h1>CREATE dataframe</h1>
+<pre class="r"><code>#collapse to a data.frame (df) with ID intentifier (PIC) 
+PIC&lt;-rep(id.names,sapply(df,nrow)) #create id.names times length of according data frame
+df&lt;-rbind.fill(df) #collapse to main df
+df&lt;-data.frame(PIC,df)
+
+# SAVE RAW df in long format ####
+#save(list=c(&#39;df&#39;,&#39;data.files&#39;,&#39;id.names&#39;),file=paste0(path_to_project,&#39;/data/raw_df_190221.Rdata&#39;))</code></pre>
+</div>
+<div id="data-quality-control-visualize-preprocessed-pd-data" class="section level1">
+<h1>Data Quality Control: visualize preprocessed PD data</h1>
+<pre class="r"><code>#check of plausibility of the data
+  df$pd&lt;-ifelse(df$pd&gt;5,NA,df$pd) ##delete some remaining implauible values
+  hist(df$pd,50,main=&#39;absolute pupil size&#39;) #--&gt; should be caught in preprocessing</code></pre>
+<p><img src="figure/preprocessing_PDmemory.Rmd/visualize%20PD%20data%20plausibility-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>  #summary(df$pd)
+    
+  g&lt;-ggplot(df[df$ts.trial&lt;240&amp;df$ts.trial&gt;30,],aes(x=ts.trial*8.3/1000,y=pd))
+  g+geom_smooth()+labs(x=&#39;trial duration (seconds)&#39;,y=&#39;pupil size (mm)&#39;)+
+    theme_bw()+
+    stat_summary(fun.data = mean_se, geom =    &quot;errorbar&quot;)+
+    labs(title=&#39;pupil dilation response aggregated across trials&#39;)</code></pre>
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+<pre><code>Warning: Removed 203926 rows containing non-finite values (stat_smooth).</code></pre>
+<pre><code>Warning: Removed 203926 rows containing non-finite values (stat_summary).</code></pre>
+<p><img src="figure/preprocessing_PDmemory.Rmd/visualize%20PD%20data%20plausibility-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>  #--&gt; PD per trial</code></pre>
+</div>
+<div id="calculate-realtive-pd-main-dependent-variable" class="section level1">
+<h1>Calculate realtive PD (main dependent variable)</h1>
+<ul>
+<li>rpd = divisive correction</li>
+<li>rpd2 = subtractive correction</li>
+</ul>
+<pre class="r"><code>## - create relative PD data  ####
+  
+#create BASELINE PD and relative PD variable
+#baseline.pd&lt;-c(with(df[df$ts.trial&lt;=30,],by(df$pd,interaction(df$PIC,df$trials),median,na.rm=T)))
+baseline.pd&lt;-c(with(df[df$ts.trial&lt;=30,],by(pd,interaction(PIC,trials),median,na.rm=T)))
+#baseline.pd&lt;-ifelse(baseline.pd&gt;5,NA,baseline.pd) #correct for implausible high baseline values
+    summary(baseline.pd)</code></pre>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&#39;s 
+  2.033   2.754   2.982   3.007   3.221   4.975    1186 </code></pre>
+<pre class="r"><code>    hist(baseline.pd)</code></pre>
+<p><img src="figure/preprocessing_PDmemory.Rmd/calculate_realtive_PD-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>baseline.identifier&lt;-names(baseline.pd)
+df.baseline&lt;-data.frame(baseline.identifier,baseline.pd)
+  #--&gt; alternative method without merge
+  # length.trial&lt;-as.numeric(by(df$pd,interaction(df$PIC,df$trials),length))
+  # length.trial&lt;-ifelse(is.na(length.trial)==T,0,length.trial)
+  # baseline.pd.long&lt;-rep(baseline.pd,length.trial)
+  # rpd&lt;-df$pd/baseline.pd.long
+  # rpd2&lt;-df$pd-baseline.pd.long
+  # df&lt;-data.frame(df,rpd,rpd2)
+merger.x&lt;-interaction(df$PIC,df$trials)    
+df&lt;-merge(data.frame(df,merger.x),df.baseline,by.x=&#39;merger.x&#39;,by.y=&#39;baseline.identifier&#39;)
+
+rpd&lt;-df$pd/df$baseline.pd
+rpd2&lt;-df$pd-df$baseline.pd
+df&lt;-data.frame(df,rpd,rpd2)
+
+    #DIAGNOSE:
+    #g&lt;-ggplot(df,aes(x=pd,y=baseline.pd))
+    #g+geom_smooth()</code></pre>
+</div>
+<div id="create-oldnew-variable-main-condition" class="section level1">
+<h1>Create “Old/New” Variable (main condition)</h1>
+<pre class="r"><code>## - GET old-new variable and match to df ####
+    #CHECK: we have to assume that old new are presented according to TrialId, word counting, is this true?
+    # evidence:  &#39;table(word.oldnew,df.oldnew$oldnew)&#39; is balanced
+data.file&lt;-data.files[grep(&#39;oldnew&#39;,data.files)]
+data.file&lt;-data.file[grep(&#39;.txt&#39;,data.file)]
+oldnew&lt;-lapply(data.file,read.csv,header=F)
+oldnew&lt;-do.call(rbind,oldnew)
+idnames.oldnew&lt;-rep(id.names,each=80)
+  TrialId.oldnew&lt;-rep(1:20,57*4)
+    #this bit corrects for pseudorandomized presentation of word categories
+    word.time&lt;-c(by(df$ID,interaction(df$word,df$PIC),mean,na.rm=T)) #mean timestamp per category per participant
+    word.time&lt;-matrix(word.time,nrow=57,ncol=4,byrow=T) #convert to matrix with participants as row, category (word) as column
+    word.time&lt;-apply(word.time,1,rank) #get rank values --&gt; when did categories appear in time
+    word.time&lt;-c(word.time) #concatenate to vector
+    word.oldnew&lt;-rep(word.time,each=20) #repeat to number of trials per category
+    
+    #word.oldnew&lt;-rep(c(rep(1,20),rep(2,20),rep(3,20),rep(4,20)),57)
+    #TO DO: --&gt; this is wrong as the types/words/conditions were counterbalanced across participants
+
+trials.oldnew&lt;-interaction(TrialId.oldnew,word.oldnew)
+df.oldnew&lt;-data.frame(idnames.oldnew,trials.oldnew,oldnew)
+names(df.oldnew)&lt;-c(&#39;PIC.oldnew&#39;,&#39;trials.oldnew&#39;,&#39;oldnew&#39;)
+  matcher.x&lt;-interaction(df$PIC,df$trials)
+  matcher.y&lt;-interaction(df.oldnew$PIC.oldnew,df.oldnew$trials.oldnew)
+  df&lt;-data.frame(df,matcher.x) 
+  df.oldnew&lt;-data.frame(df.oldnew,matcher.y)
+df&lt;-merge(df,df.oldnew,by.x=&#39;matcher.x&#39;,by.y=&#39;matcher.y&#39;)
+
+#change to factor
+df$oldnew&lt;-ifelse(df$oldnew==1,&#39;old&#39;,&#39;new&#39;)
+df$oldnew&lt;-as.factor(df$oldnew)</code></pre>
+</div>
+<div id="create-group-variable" class="section level1">
+<h1>Create group variable</h1>
+<pre class="r"><code>## - define group condition ####
+group&lt;-ifelse(grepl(&#39;AS&#39;,df$PIC)==T,&#39;ASD&#39;,&#39;TD&#39;)
+df&lt;-data.frame(df,group)</code></pre>
+</div>
+<div id="control-for-gaze-behavior" class="section level1">
+<h1>Control for gaze behavior</h1>
+<ul>
+<li>restrict gaze behavior to central 41%</li>
+<li>substantially alters results as ASD participants are more inclined to look away</li>
+</ul>
+<pre class="r"><code>## - GAZE behavior control - restrict gaze behavior to central 41% ####
+##--&gt; substantially changes the results --&gt; ASD often look away
+
+hist(df$XGazePosLeftEye[df$XGazePosLeftEye&lt;1&amp;df$XGazePosLeftEye&gt;=0])</code></pre>
+<p><img src="figure/preprocessing_PDmemory.Rmd/control_gaze_behavior-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>hist(df$XGazePosRightEye[df$XGazePosRightEye&lt;1&amp;df$XGazePosRightEye&gt;=0])</code></pre>
+<p><img src="figure/preprocessing_PDmemory.Rmd/control_gaze_behavior-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>hist(df$YGazePosLeftEye[df$YGazePosLeftEye&lt;1&amp;df$YGazePosLeftEye&gt;=0])</code></pre>
+<p><img src="figure/preprocessing_PDmemory.Rmd/control_gaze_behavior-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>hist(df$YGazePosRightEye[df$YGazePosRightEye&lt;1&amp;df$YGazePosRightEye&gt;=0])</code></pre>
+<p><img src="figure/preprocessing_PDmemory.Rmd/control_gaze_behavior-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>psych::describe(df$XGazePosLeftEye[df$XGazePosLeftEye&lt;1&amp;df$XGazePosLeftEye&gt;=0]) #--&gt; M=0.49, SD=0.18</code></pre>
+<pre><code>   vars       n mean   sd median trimmed  mad min max range  skew kurtosis se
+X1    1 1809141 0.49 0.18    0.5    0.49 0.08   0   1     1 -0.04    -0.04  0</code></pre>
+<pre class="r"><code>psych::describe(df$XGazePosRightEye[df$XGazePosRightEye&lt;1&amp;df$XGazePosRightEye&gt;=0]) #--&gt; M=0.5, SD=0.18</code></pre>
+<pre><code>   vars       n mean   sd median trimmed  mad min max range  skew kurtosis se
+X1    1 1805538  0.5 0.18   0.51     0.5 0.08   0   1     1 -0.05    -0.11  0</code></pre>
+<pre class="r"><code>psych::describe(df$YGazePosLeftEye[df$YGazePosLeftEye&lt;1&amp;df$YGazePosLeftEye&gt;=0]) #--&gt; M=0.51, SD=0.19</code></pre>
+<pre><code>   vars       n mean   sd median trimmed  mad min max range  skew kurtosis se
+X1    1 1780930 0.51 0.19    0.5    0.52 0.15   0   1     1 -0.13    -0.34  0</code></pre>
+<pre class="r"><code>psych::describe(df$YGazePosRightEye[df$YGazePosRightEye&lt;1&amp;df$YGazePosRightEye&gt;=0]) #--&gt; M=0.52, SD=0.18</code></pre>
+<pre><code>   vars       n mean   sd median trimmed  mad min max range  skew kurtosis se
+X1    1 1776269 0.52 0.18    0.5    0.52 0.15   0   1     1 -0.15     -0.3  0</code></pre>
+<pre class="r"><code>#analyzed display area compared to full display area
+(0.72*0.75)/1</code></pre>
+<pre><code>[1] 0.54</code></pre>
+<pre class="r"><code>###--&gt; values derived from above
+valid.gaze&lt;-with(df,ifelse(XGazePosLeftEye&gt;0.13&amp;
+                             XGazePosLeftEye&lt;0.85&amp;
+                             XGazePosRightEye&gt;0.14&amp;
+                             XGazePosRightEye&lt;0.86&amp;
+                             YGazePosLeftEye&gt;0.13&amp;
+                             YGazePosLeftEye&lt;0.88&amp;
+                             YGazePosRightEye&gt;0.13&amp;
+                             YGazePosRightEye&lt;0.88,T,F))
+
+# valid.gaze&lt;-with(df,ifelse(XGazePosLeftEye&gt;0.4&amp;
+#                              XGazePosLeftEye&lt;0.6&amp;
+#                              XGazePosRightEye&gt;0.4&amp;
+#                              XGazePosRightEye&lt;0.6&amp;
+#                              YGazePosLeftEye&gt;0.4&amp;
+#                              YGazePosLeftEye&lt;0.6&amp;
+#                              YGazePosRightEye&gt;0.4&amp;
+#                              YGazePosRightEye&lt;0.6,T,F))
+
+sum(is.na(df$pd))/length(df$pd) #44.1% before gaze control</code></pre>
+<pre><code>[1] 0.3695424</code></pre>
+<pre class="r"><code>df$pd&lt;-with(df,ifelse(valid.gaze==T,pd,NA))
+df$rpd&lt;-with(df,ifelse(valid.gaze==T,rpd,NA))
+df$rpd2&lt;-with(df,ifelse(valid.gaze==T,rpd2,NA))
+
+sum(is.na(df$pd))/length(df$pd) #51.07% after gaze control</code></pre>
+<pre><code>[1] 0.4508334</code></pre>
+<pre class="r"><code>paste(&#39;excluded PD after preprocessing relative to possible PD data&#39;,
+      round(sum(is.na(df$rpd))/length(df$rpd),4)*100, #51.08% after gaze control
+      &#39;%&#39;)</code></pre>
+<pre><code>[1] &quot;excluded PD after preprocessing relative to possible PD data 46.74 %&quot;</code></pre>
+</div>
+<div id="exclude-participants-with-low-number-of-trials" class="section level1">
+<h1>Exclude participants with low number of trials</h1>
+<pre class="r"><code>## - trials per ID ####
+df.removed_NA&lt;-df[!is.na(df$rpd2),]
+analyzed_trials_perPIC&lt;-with(df.removed_NA,by(trials,PIC,function(x){length(unique(x))}))
+
+hist(analyzed_trials_perPIC)</code></pre>
+<p><img src="figure/preprocessing_PDmemory.Rmd/exclude_IDs_low_quality-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#hist(as.numeric(analyzed_trials_perPIC)[group==&#39;A&#39;])
+#hist(as.numeric(analyzed_trials_perPIC)[group==&#39;C&#39;])
+
+group&lt;-substr(unlist(labels(analyzed_trials_perPIC)),1,1)
+
+print(&#39;IDs with low number of trials:&#39;)</code></pre>
+<pre><code>[1] &quot;IDs with low number of trials:&quot;</code></pre>
+<pre class="r"><code>analyzed_trials_perPIC[which(analyzed_trials_perPIC&lt;32)]</code></pre>
+<pre><code>PIC
+AS205 AS207  AS33 
+    1    10     6 </code></pre>
+<pre class="r"><code>###--&gt; exclude three participants that deliver only very low number of trials AS205 (k=1), AS33 (k=6), AS207
+df&lt;-df[!df$PIC %in% c(&#39;AS205&#39;,&#39;AS207&#39;,&#39;AS33&#39;),]</code></pre>
+</div>
+<div id="compare-number-of-trials-per-group" class="section level1">
+<h1>Compare: number of trials per group</h1>
+<pre class="r"><code>  analyzed_trials_perPIC&lt;-analyzed_trials_perPIC[!names(analyzed_trials_perPIC) %in% c(&#39;AS205&#39;,&#39;AS207&#39;,&#39;AS33&#39;)]
+  group&lt;-substr(unlist(labels(analyzed_trials_perPIC)),1,1)
+  
+  print(&#39;number of trials do not differ between groups:&#39;)</code></pre>
+<pre><code>[1] &quot;number of trials do not differ between groups:&quot;</code></pre>
+<pre class="r"><code>  t.test(as.numeric(analyzed_trials_perPIC)~group)</code></pre>
+<pre><code>
+    Welch Two Sample t-test
+
+data:  as.numeric(analyzed_trials_perPIC) by group
+t = 0.23496, df = 49.567, p-value = 0.8152
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -6.984211  8.834211
+sample estimates:
+mean in group A mean in group C 
+         62.625          61.700 </code></pre>
+<pre class="r"><code>  by(as.numeric(analyzed_trials_perPIC),group,psych::describe)</code></pre>
+<pre><code>group: A
+   vars  n  mean    sd median trimmed   mad min max range skew kurtosis   se
+X1    1 24 62.62 14.33   65.5   63.75 15.57  32  80    48 -0.6    -0.73 2.93
+------------------------------------------------------------ 
+group: C
+   vars  n mean    sd median trimmed  mad min max range  skew kurtosis   se
+X1    1 30 61.7 14.43   65.5      63 12.6  32  80    48 -0.63    -0.83 2.63</code></pre>
+</div>
+<div id="save-df-to-file" class="section level1">
+<h1>SAVE df to file</h1>
+<pre class="r"><code>## - FINAL df in long format (LOAD HERE) ####
+#save(df,file=&#39;data/main_df_120819.Rdata&#39;)
+#load(paste0(path_to_project,&quot;/data/main_df_120819.Rdata&quot;))</code></pre>
+</div>
+<div id="create-trial-aggregated-file" class="section level1">
+<h1>create trial-aggregated file</h1>
+<ul>
+<li>df.trial</li>
+</ul>
+<pre class="r"><code>## - AGGREGATE TO TRIAL (df_trial) ####
+
+    #create trial cat variable
+    trial.cat&lt;-with(df,ifelse(ts.trial&lt;30,1,
+                              ifelse(ts.trial&lt;60,2,
+                                     ifelse(ts.trial&lt;90,3,
+                                            ifelse(ts.trial&lt;120,4,
+                                                   ifelse(ts.trial&lt;150,5,
+                                                          ifelse(ts.trial&lt;180,6,
+                                                                 ifelse(ts.trial&lt;210,7,
+                                                                        ifelse(ts.trial&lt;=240,8,NA)))))))))
+    
+  
+  #phasic PD variable  
+  rpd_end&lt;-as.numeric(with(df[trial.cat==8,],by(rpd,interaction(PIC,trials),mean,na.rm=T)))
+  rpd_start&lt;-as.numeric(with(df[trial.cat==1,],by(rpd,interaction(PIC,trials),mean,na.rm=T)))
+  rpd_response&lt;-rpd_end-rpd_start
+  
+  ###--&gt; something goes wrong during aggregating?
+  
+  #aggregate additional variables
+  pd&lt;-as.numeric(with(df,by(pd,interaction(PIC,trials),median,na.rm=T)))
+  rpd&lt;-as.numeric(with(df,by(rpd,interaction(PIC,trials),median,na.rm=T)))
+  word&lt;-as.numeric(with(df,by(word,interaction(PIC,trials),median,na.rm=T)))
+  group&lt;-as.factor(with(df,by(group,interaction(PIC,trials),head,n=1)))
+  trials&lt;-as.factor(with(df,by(trials,interaction(PIC,trials),head,n=1)))
+  PIC&lt;-as.factor(with(df,by(PIC,interaction(PIC,trials),head,n=1)))
+  oldnew&lt;-as.factor(with(df,by(oldnew,interaction(PIC,trials),head,n=1)))
+  shape&lt;-as.numeric(with(df,by(shape,interaction(PIC,trials),head,n=1)))
+  levels(group)&lt;-levels(df$group)
+  levels(PIC)&lt;-levels(df$PIC)
+  levels(oldnew)&lt;-levels(df$oldnew)
+  #levels(trials)&lt;-levels(df$trials) #do not copy level names to be able to merge with perforamnce data
+  
+  #create data frame
+  df_trial&lt;-data.frame(PIC,trials,group,word,oldnew,shape,pd,rpd,rpd_response,rpd_end,rpd_start)    </code></pre>
+</div>
+<div id="load-performance-data" class="section level1">
+<h1>LOAD performance data</h1>
+<pre class="r"><code>## READ performance data ####
+  
+  #read excel file with data in different worksheets
+  xlsx_file&lt;-paste0(home_path,folder_to_data,&#39;/data_performance_demo/accuracy,RT.xlsx&#39;)
+  sheets &lt;- excel_sheets(xlsx_file)
+  list_perf &lt;- lapply(sheets, function(X){read_excel(xlsx_file, sheet = X)})
+  list_perf &lt;- lapply(list_perf, as.data.frame)
+  names(list_perf)&lt;-sheets
+    
+  #FORMAT list to df#
+  df_perf&lt;-do.call(rbind,list_perf)
+  
+  PIC&lt;-substr(row.names(df_perf),1,5)
+  PIC[grep(&#39;C&#39;,PIC)]&lt;-substr(PIC[grep(&#39;C&#39;,PIC)],1,nchar(PIC[grep(&#39;C&#39;,PIC)])-1)  #remove unncessary characters
+  PIC[grep(&#39;\\.&#39;,PIC)]&lt;-substr(PIC[grep(&#39;\\.&#39;,PIC)],1,nchar(PIC[grep(&#39;\\.&#39;,PIC)])-1)  #as dot is a special character it needs to be escaped by \\
+  
+  trials&lt;-rep(1:80,times=57)
+
+  df_perf&lt;-data.frame(PIC,trials,df_perf)
+  
+  paste(&#39;overall accuracy:&#39;,
+        round(table(df_perf$Acc)[2]/sum(table(df_perf$Acc)),2),
+        &quot;%&quot;)</code></pre>
+<pre><code>[1] &quot;overall accuracy: 0.81 %&quot;</code></pre>
+</div>
+<div id="load-encoding-data" class="section level1">
+<h1>LOAD encoding data</h1>
+<pre class="r"><code>###--&gt; calculation of df_trial_enc see code &quot;analysis_encoding_RingPD.R
+  load(&quot;data/encoding_df_200120.Rdata&quot;)
+
+### TODO: integrate CODE script &quot;analysis_encoding_RingPD.R&quot; here:</code></pre>
+</div>
+<div id="load-demographic-data" class="section level1">
+<h1>LOAD demographic data</h1>
+<pre class="r"><code>## READ and DESCRIBE demographics data (participants table) ####
+  
+  df_demo&lt;-read_xlsx(paste0(home_path,folder_to_data,&quot;/data_performance_demo/demographics.xlsx&quot;))
+    
+  #exclude participants that are removed from analysis  
+  df_demo&lt;-df_demo[!df_demo$participant %in% c(&#39;AS205&#39;,&#39;AS207&#39;,&#39;AS33&#39;),]
+
+  #add baseline retreival pd data
+  bps_agg&lt;-with(df,by(baseline.pd,PIC,mean,na.rm=T))
+  bps_agg&lt;-bps_agg[!(names(bps_agg) %in% c(&#39;AS205&#39;,&#39;AS207&#39;,&#39;AS33&#39;))]
+  df_bps_agg&lt;-data.frame(names(bps_agg),as.numeric(bps_agg))
+  names(df_bps_agg)&lt;-c(&#39;PIC&#39;,&#39;bps_agg&#39;)
+  df_demo&lt;-merge(df_demo,df_bps_agg,by.x=&#39;participant&#39;,by.y=&#39;PIC&#39;)
+
+  #add baseline encoding pd data
+  bps_agg&lt;-with(df_enc,by(baseline.pd,PIC,mean,na.rm=T))
+  bps_agg&lt;-bps_agg[!(names(bps_agg) %in% c(&#39;AS205&#39;,&#39;AS207&#39;,&#39;AS33&#39;))]
+  df_bps_agg&lt;-data.frame(names(bps_agg),as.numeric(bps_agg))
+  names(df_bps_agg)&lt;-c(&#39;PIC&#39;,&#39;bps_enc_agg&#39;)
+  df_demo&lt;-merge(df_demo,df_bps_agg,by.x=&#39;participant&#39;,by.y=&#39;PIC&#39;)</code></pre>
+</div>
+<div id="merge-performance-and-demographics-to-trial-aggregated-data" class="section level1">
+<h1>MERGE performance and demographics to trial aggregated data</h1>
+<pre class="r"><code>## MERGE performance and demographics to df_trial (trial aggregated) ####
+  
+  int_df_perf&lt;-with(df_perf,interaction(PIC,trials))
+  int_df_trial&lt;-with(df_trial,interaction(PIC,trials))
+  df_trial&lt;-data.frame(df_trial,int_df_trial)
+  df_perf&lt;-data.frame(df_perf,int_df_perf)
+
+  #merge performance
+  df_trial&lt;-merge(df_perf,df_trial,by.x=&#39;int_df_perf&#39;,by.y=&#39;int_df_trial&#39;,all.x=T)  
+  df_trial&lt;-df_trial[,-c(1,2,3)]
+  names(df_trial)[which(names(df_trial)==&#39;PIC.y&#39;)]&lt;-&#39;PIC&#39;
+  names(df_trial)[which(names(df_trial)==&#39;trials.y&#39;)]&lt;-&#39;trials&#39;
+
+  df_trial$Acc&lt;-as.factor(df_trial$Acc)
+
+  #merge demographics
+  df_trial&lt;-merge(df_trial,df_demo,by.x=&#39;PIC&#39;,by.y=&#39;participant&#39;,all.x = T)</code></pre>
+</div>
+<div id="merge-encoding-data" class="section level1">
+<h1>MERGE encoding data</h1>
+<pre class="r"><code>## MERGE encoding data ####
+    
+  ###PIC by shape links &quot;encoding&quot; and &quot;task&quot; data - but shapes are only specific for their respective &quot;word&quot;
+  df_trial_enc$shape_identifier_enc&lt;-with(df_trial_enc,interaction(PIC,shape,word))
+  df_trial_enc_merge&lt;-df_trial_enc[,c(&#39;pd&#39;,&#39;rpd&#39;,&#39;rpd_end&#39;,&#39;rpd_start&#39;,&#39;rpd_sepr_1s&#39;,&#39;rpd_sepr_2s&#39;,&#39;stimulus&#39;,&#39;shape_identifier_enc&#39;)]
+  
+  #only relevant for &quot;old&quot; stimuli
+  df_trial_old&lt;-df_trial[!is.na(df_trial$PIC),]
+  df_trial_old$PIC&lt;-droplevels(df_trial_old$PIC)
+  df_trial_old&lt;-df_trial_old[df_trial_old$oldnew==&#39;old&#39;,]
+  df_trial_old$shape_identifier_task&lt;-with(df_trial_old,interaction(PIC,shape,word))
+  
+  df_trial_old&lt;-merge(df_trial_old,df_trial_enc_merge,
+              by.x=&#39;shape_identifier_task&#39;,by.y=&#39;shape_identifier_enc&#39;,
+              suffixes = c(&#39;_task&#39;,&#39;_enc&#39;))
+
+  hist(df_trial_old$rpd_enc,50,main=&#39;encoding evoked pupillary response (EEPR)&#39;)</code></pre>
+<p><img src="figure/preprocessing_PDmemory.Rmd/merge_encoding_data-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>  hist(df_trial_old$rpd_response,50,main=&#39;stimulus evoked pupillary response (SEPR)&#39;)</code></pre>
+<p><img src="figure/preprocessing_PDmemory.Rmd/merge_encoding_data-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>  #ggplot(df_trial_old,aes(scale(rpd_enc),fill=group))+geom_histogram(position = &quot;dodge&quot;)
+  #ggplot(df_trial_old,aes(scale(rpd_response),fill=group))+geom_histogram(position = &quot;dodge&quot;)
+  
+  with(df_trial_old,psych::describe(rpd_enc))</code></pre>
+<pre><code>   vars    n mean   sd median trimmed  mad   min max range  skew kurtosis se
+X1    1 1288    0 0.03      0       0 0.02 -0.14 0.1  0.24 -0.29     2.52  0</code></pre>
+<pre class="r"><code>  with(df_trial_old,psych::describe(rpd_response))</code></pre>
+<pre><code>   vars   n mean   sd median trimmed  mad   min  max range skew kurtosis se
+X1    1 982 0.02 0.07   0.01    0.02 0.06 -0.25 0.34  0.59 0.59     1.16  0</code></pre>
+</div>
+<div id="add-pd-data-to-aggregated-file" class="section level1">
+<h1>ADD PD data to aggregated file</h1>
+<pre class="r"><code>### ADD aggregated PD data to df_demo ####  
+    
+  #add accuracy data
+  acc_agg&lt;-with(df_trial_old,by(as.numeric(Acc)-1,PIC,mean,na.rm=T))
+  acc_agg&lt;-acc_agg[!(names(acc_agg) %in% c(&#39;AS205&#39;,&#39;AS207&#39;,&#39;AS33&#39;))]
+  df_acc_agg&lt;-data.frame(names(acc_agg),as.numeric(acc_agg))
+  names(df_acc_agg)&lt;-c(&#39;PIC&#39;,&#39;acc_agg&#39;)
+  df_demo&lt;-merge(df_demo,df_acc_agg,by.x=&#39;participant&#39;,by.y=&#39;PIC&#39;,all.x=T)
+  
+  #add encoding PD data
+  rpd_enc_agg&lt;-with(df_trial_old,by(rpd_enc,PIC,mean,na.rm=T))
+  rpd_enc_agg&lt;-rpd_enc_agg[!(names(rpd_enc_agg) %in% c(&#39;AS205&#39;,&#39;AS207&#39;,&#39;AS33&#39;))]
+  df_enc_agg&lt;-data.frame(names(rpd_enc_agg),as.numeric(rpd_enc_agg))
+  names(df_enc_agg)&lt;-c(&#39;PIC&#39;,&#39;rpd_enc_agg&#39;)
+  df_demo&lt;-merge(df_demo,df_enc_agg,by.x=&#39;participant&#39;,by.y=&#39;PIC&#39;,all.x=T)
+  
+  #add retrieval PD data
+  rpd_rec_agg&lt;-with(df_trial_old,by(rpd_response,PIC,mean,na.rm=T))
+  rpd_rec_agg&lt;-rpd_rec_agg[!(names(rpd_rec_agg) %in% c(&#39;AS205&#39;,&#39;AS207&#39;,&#39;AS33&#39;))]
+  df_rec_agg&lt;-data.frame(names(rpd_rec_agg),as.numeric(rpd_rec_agg))
+  names(df_rec_agg)&lt;-c(&#39;PIC&#39;,&#39;rpd_rec_agg&#39;)
+  df_demo&lt;-merge(df_demo,df_rec_agg,by.x=&#39;participant&#39;,by.y=&#39;PIC&#39;,all.x=T)</code></pre>
+</div>
+<div id="save-to-file" class="section level1">
+<h1>SAVE TO FILE</h1>
+<pre class="r"><code>save(df_demo,df_trial,df_trial_old,df,df_trial_enc,df_enc,
+     file=paste0(path_to_project,&#39;/data/main_df_preprocessed_220221.Rdata&#39;))</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.6.1 (2019-07-05)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 19041)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=German_Germany.1252  LC_CTYPE=German_Germany.1252   
+[3] LC_MONETARY=German_Germany.1252 LC_NUMERIC=C                   
+[5] LC_TIME=German_Germany.1252    
+
+attached base packages:
+[1] grid      stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] kableExtra_1.3.1 gridExtra_2.3    emmeans_1.4.3.01 lmerTest_3.1-2  
+ [5] lme4_1.1-23      Matrix_1.2-18    ggplot2_3.2.1    plyr_1.8.5      
+ [9] zoo_1.8-6        readxl_1.3.1     workflowr_1.6.2 
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.3          mvtnorm_1.0-11      lattice_0.20-38    
+ [4] rprojroot_1.3-2     digest_0.6.23       psych_1.9.12.31    
+ [7] R6_2.4.1            cellranger_1.1.0    backports_1.1.5    
+[10] evaluate_0.14       httr_1.4.1          pillar_1.4.3       
+[13] rlang_0.4.8         lazyeval_0.2.2      minqa_1.2.4        
+[16] rstudioapi_0.10     whisker_0.4         nloptr_1.2.1       
+[19] rmarkdown_2.0       labeling_0.3        splines_3.6.1      
+[22] webshot_0.5.2       statmod_1.4.34      stringr_1.4.0      
+[25] munsell_0.5.0       compiler_3.6.1      numDeriv_2016.8-1.1
+[28] httpuv_1.5.2        xfun_0.11           pkgconfig_2.0.3    
+[31] mnormt_1.5-5        mgcv_1.8-31         htmltools_0.4.0    
+[34] tidyselect_1.1.0    tibble_3.0.4        viridisLite_0.3.0  
+[37] crayon_1.3.4        dplyr_1.0.2         withr_2.1.2        
+[40] later_1.0.0         MASS_7.3-51.5       nlme_3.1-143       
+[43] xtable_1.8-4        gtable_0.3.0        lifecycle_0.2.0    
+[46] git2r_0.26.1        magrittr_1.5        scales_1.1.0       
+[49] estimability_1.3    stringi_1.4.5       farver_2.0.1       
+[52] fs_1.3.1            promises_1.1.0      xml2_1.2.2         
+[55] ellipsis_0.3.0      generics_0.0.2      vctrs_0.3.4        
+[58] boot_1.3-24         tools_3.6.1         glue_1.4.2         
+[61] purrr_0.3.3         parallel_3.6.1      yaml_2.2.0         
+[64] colorspace_1.4-1    rvest_0.3.5         knitr_1.26         </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
