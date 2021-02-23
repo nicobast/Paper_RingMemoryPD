@@ -1,0 +1,471 @@
+---
+title: "Analysis"
+author: "Nico Bast"
+date: "23 2 2021"
+output: html_document
+
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+
+#options for all chunks
+knitr::opts_chunk$set(echo = FALSE) #reflect code in resulting markdown
+knitr::opts_chunk$set(cache = TRUE) #caching
+knitr::opts_chunk$set(autodep = TRUE) #to remove error for caching in mardown result 
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_knit$set(root.dir = "..") ##set root dir to project folder
+
+#load packagaes
+suppressMessages({
+#preprocessing:
+#require(openxlsx) #read excel files
+require(readxl)  #read excel files
+require(zoo) #required for na.approx func within pd.preprocess.func
+require(plyr) #rbind.fill
+require(papaja) #cite_r
+  #analyses:
+require(ggplot2)
+require(lme4) #linear mixed model (LMM)
+require(lmerTest) #LMM p-values
+require(emmeans) #contrasts in LMM
+require(hexbin) #see figure 3
+  
+#plotting
+require(grid)
+require(gridExtra)
+require(kableExtra)
+require(webshot) #save kable to file
+  #webshot::install_phantomjs() #run manually to install phantomjs to save kable to file
+})
+
+#define paths
+ifelse(Sys.info()['sysname']=='Linux',
+       home_path<-'~',
+       home_path<-'C:/Users/Nico')
+
+folder_to_data<-"/PowerFolders/data_RING"
+data_modality<-"/data_PDmemory"
+
+path_to_data<-paste0(home_path,folder_to_data,data_modality)
+path_to_project<-paste0(home_path,'/PowerFolders/Paper_RingMemoryPD')
+
+path_to_data
+path_to_project
+
+```
+
+# Load preprocessed data
+
+```{r load_preprocessed_data}
+
+load(paste0(path_to_project,'/data/main_df_preprocessed_220221.Rdata'))
+
+ls()
+
+```
+
+# figure 3: preprocessed data
+
+```{r figure_preprocessed_data, warning=FALSE, fig.height=4,fig.width=10}
+#histogram of relative pupil dialtion (dependent variable)
+d1<-ggplot(df,aes(x=rpd))+
+      geom_histogram(fill='royalblue4',color='lightblue',bins=50)+ #GEOM
+      xlim(0.8,1.3)+
+      labs(x='relative pupil dilation (standardized)')+
+      theme_bw()
+
+#heatmap gaze behavior
+g<-ggplot(df[df$ts.trial>30&df$ts.trial<=240 & (!is.na(df$pd)),],aes(x=XGazePosLeftEye,y=YGazePosLeftEye,fill=..density..))
+d2<-g+geom_hex(bins=100)+xlim(0.4,0.6)+ylim(0.35,0.65)+scale_fill_gradientn(colours=rev(rainbow(3)))+
+    labs(x='x-axis (standardized)',y='y-axis (standardized)')+
+    theme_bw()
+
+
+  #create file
+  tiff(filename = paste0(path_to_project,"/output/figure3_histogram_heatmap.tiff"),
+       width = 10, height = 4, units = "in", pointsize = 12, res=300, compression="lzw") #define dimensions
+
+
+  grid.arrange(d1, d2, ncol=2)
+
+
+  #save to file
+  dev.off()
+  
+  grid.arrange(d1, d2, ncol=2)
+  
+```
+
+
+# Sample description
+
+```{r sample_description}
+
+
+func_describe_table<-function(data,var){
+  var_meanSD_ASD<-do.call(rbind,with(data,by(var,ASD,psych::describe)))['ASD',c('mean','sd')]
+  var_range_ASD<-do.call(rbind,with(data,by(var,ASD,psych::describe)))['ASD',c('min','max')]
+  var_range_ASD<-with(var_range_ASD,paste(round(min,2),'-',round(max,2)))  
+  var_meanSD_TD<-do.call(rbind,with(data,by(var,ASD,psych::describe)))['TD',c('mean','sd')]
+  var_range_TD<-do.call(rbind,with(data,by(var,ASD,psych::describe)))['TD',c('min','max')]
+  var_range_TD<-with(var_range_TD,paste(round(min,2),'-',round(max,2)))  
+  outcome<-cbind(round(var_meanSD_ASD,2),var_range_ASD,round(var_meanSD_TD,2),var_range_TD)
+  row.names(outcome)<-deparse(substitute(var))
+  outcome
+}
+
+df_describe<-rbind(
+  func_describe_table(df_demo,df_demo$age),
+  func_describe_table(df_demo,df_demo$VIQ),
+  func_describe_table(df_demo,df_demo$PIQ),
+  func_describe_table(df_demo,df_demo$FIQ),
+  func_describe_table(df_demo,df_demo$AQ),
+  func_describe_table(df_demo,df_demo$acc_agg),
+  func_describe_table(df_demo,df_demo$bps_enc_agg),
+  func_describe_table(df_demo,df_demo$bps_agg),
+  func_describe_table(df_demo,df_demo$rpd_enc_agg),
+  func_describe_table(df_demo,df_demo$rpd_rec_agg)
+  )
+
+row.names(df_describe)<-c('age','VIQ','PIQ','FIQ','AQ','recognition accuracy','BPS encoding','BPS retrieval','EEPR','SEPR')
+names(df_describe)<-c('mean','SD','range','mean','SD','range')
+
+func_group_difference<-function(data,var,group){
+  anova_result<-with(data,summary(aov(var~group)))[[1]]
+  t_value<-round(anova_result['F value'][1,1],2)
+  p_value<-round(anova_result['Pr(>F)'][1,1],2)
+  cohend_result<-round(with(data,psych::cohen.d(var,as.factor(group)))[[1]],2)
+  cohend_d<-cohend_result[1,2]
+  cohend_CI<-paste(cohend_result[1,1],',',cohend_result[1,3])
+  cbind(t_value,p_value,cohend_d,cohend_CI)
+}
+
+df_group_difference<-data.frame(rbind(
+  func_group_difference(df_demo,df_demo$age,df_demo$ASD),
+  func_group_difference(df_demo,df_demo$VIQ,df_demo$ASD),
+  func_group_difference(df_demo,df_demo$PIQ,df_demo$ASD),
+  func_group_difference(df_demo,df_demo$FIQ,df_demo$ASD),
+  func_group_difference(df_demo,df_demo$AQ,df_demo$ASD),
+  func_group_difference(df_demo,df_demo$acc_agg,df_demo$ASD),
+  func_group_difference(df_demo,df_demo$bps_enc_agg,df_demo$ASD),
+  func_group_difference(df_demo,df_demo$bps_agg,df_demo$ASD),
+  func_group_difference(df_demo,df_demo$rpd_enc_agg,df_demo$ASD),
+  func_group_difference(df_demo,df_demo$rpd_rec_agg,df_demo$ASD)
+  ))
+
+names(df_group_difference)<-c('F','p','d','CI-95%')
+
+df_describe<-cbind(df_describe,df_group_difference)
+
+table1<-df_describe %>%
+    kbl(caption = "Table 1. Sample description") %>%
+    kable_classic(full_width = F, html_font = "Cambria") %>%
+    add_header_above(c(" " = 1, "ASD (21m, 3f)" = 3, "TD (23m, 7f)" = 3, 'difference'=2, 'effect size' = 2))
+
+table1
+
+save_kable(table1,file=paste0(path_to_project,'/output/table1_sampledescription.pdf'))
+
+```
+
+# Recognition accuracy
+
+```{r accuracy_between_groups}
+
+ df_trial_old$PIC<-droplevels((df_trial_old$PIC))
+  with(df_trial_old,round(table(group,Acc)/rowSums(table(group,Acc)),2))
+
+    with(df_demo,by(acc_agg,ASD,psych::describe))
+    t.test(acc_agg~ASD,df_demo)
+
+  model_lmm<-glmer(Acc~group+
+                    (1|word)+(1|PIC),family= 'binomial',data = df_trial_old)
+
+  summary(model_lmm)
+  exp(cbind(round(fixef(model_lmm)['groupTD'],2),
+        round(confint(model_lmm,parm ='groupTD'),2)))
+
+    confint(contrast(emmeans(model_lmm,~group),method='revpairwise'))
+    ##--> higher accuracy in TD
+  exp(fixef(model_lmm))
+
+```
+
+# EEPR between groups
+
+## EEPR model summary
+
+```{r EEPR}
+#EEPR
+anova(lmer(scale(rpd_enc)~group+(1|PIC)+(1|stimulus),data=df_trial_old))
+summary(model_lm<-lmer(scale(rpd_enc)~group+(1|PIC)+(1|stimulus),data=df_trial_old))
+confint(contrast(pmmeans(model_lm,~group),'pairwise')) #encoding pd effect
+
+#BPS encoding
+anova(lmer(scale(pd)~group+(1|PIC)+(1|stimulus),data=df_trial_enc))
+summary(model_lm<-lmer(scale(pd)~group+(1|PIC)+(1|stimulus),data=df_trial_enc))
+
+
+
+```
+
+## figure 4: EEPR
+
+```{r figure EEPR, warning=FALSE, fig.height=5, fig.width=9}
+
+tiff(filename = paste0(path_to_project,"/output/figure4_encodingeffect_group.tiff"),
+       width = 9, height = 5, units = "in", pointsize = 12, res=300, compression="lzw") #define dimensions
+
+  g1<-ggplot(df_trial_old,aes(x=group,y=scale(rpd_enc),color=group))+
+    geom_jitter(alpha=0.8)+geom_boxplot(fill='lightgray',notch = T,outlier.shape = NA)+
+    ylim(-2,2)+
+    xlab('')+ylab('EEPR (z)')+
+    theme_bw()+
+    theme(legend.position = "none")
+
+  #Plotting
+  #g<-ggplot(df_enc[df_enc$ts.trial<360,],aes(x=ts.trial*8.3/1000,y=rpd,color=group))
+  g2<-ggplot(df_enc[df_enc$ts.trial>4 & df_enc$ts.trial<240,],aes(x=ts.trial*8.3/1000,y=scale(rpd),color=group))+
+    geom_smooth(se=F, cex=2)+labs(x='seconds (s)',y='EEPR (z)')+
+    theme_bw()+
+    theme(legend.position = "none")+
+    #geom_vline(xintercept = 2,lty=2)+
+    stat_summary(fun.data = mean_se, geom = "errorbar")
+  #facet_wrap(~stimulus)
+
+  grid.arrange(g1,g2,widths= 1:2, ncol=2)
+
+  dev.off()
+  
+  grid.arrange(g1,g2,widths= 1:2, ncol=2)
+
+```
+
+# SEPR between groups
+
+## SEPR model summary
+
+```{r SEPR}
+#SEPR
+anova(lmer(scale(rpd_response)~group*oldnew+(1|PIC)+(1|word),data=df_trial))
+summary(model_lmm<-lmer(scale(rpd_response)~group*oldnew+(1|PIC)+(1|word),data=df_trial))
+confint(contrast(pmmeans(model_lm,~group),'pairwise'))
+
+cbind(round(fixef(model_lmm)['oldnewold'],2),
+          round(confint(model_lmm,parm ='oldnewold'),2))
+
+confint(contrast(emmeans(model_lmm,~oldnew|group),method='revpairwise'))
+
+#BPS retrieval
+anova(lmer(scale(pd)~group+(1|PIC)+(1|word),data=df_trial))
+summary(model_lm<-lmer(scale(pd)~group+(1|PIC)+(1|word),data=df_trial))
+```
+
+## figure 5: SEPR 
+
+```{r SEPR_figure, warning=FALSE, fig.height=5, fig.width=9}
+
+ #create file
+  tiff(filename = paste0(path_to_project,"/output/figure5_memoryeffect_group.tiff"),
+       width = 9, height = 5, units = "in", pointsize = 12, res=300, compression="lzw") #define dimensions
+
+  g1<-ggplot(df_trial_old,aes(x=group,y=scale(rpd_sepr_2s),color=group))+
+    geom_jitter(alpha=0.8)+geom_boxplot(fill='lightgray',notch = T,outlier.shape = NA)+
+    ylim(-2,2)+
+    xlab('')+ylab('SEPR (z)')+
+    theme_bw()+
+    theme(legend.position = "none")
+
+  #relative PD (divisive correction)
+  g2<-ggplot(df[df$ts.trial<240&df$ts.trial>30,],aes(x=ts.trial*8.3/1000,y=scale(rpd),color=group,lty=oldnew))+
+  #plot figure
+  geom_smooth(se=F, cex=2)+
+    stat_summary(fun.data = mean_se, geom = "errorbar", inherit.aes=F, aes(x=ts.trial*8.3/1000,y=scale(rpd),group=interaction(group,oldnew),color=group),cex=0.5)+ #inherit.aes=F and delivered aes as thios prevents different lty for errorbars
+    labs(x='seconds (s)',y='SEPR (z)')+
+    annotate('rect',ymin=0, ymax=0.75, xmin=1.75, xmax=2.00, alpha=0.2)+
+    theme_bw()
+    #facet_wrap(~factor(word,levels=c(1,2,3,4),labels=c('word','non-word','picture','shape')),ncol=2)
+
+  grid.arrange(g1,g2,widths= 1:2, ncol=2)
+
+  #save to file
+  dev.off()
+
+  grid.arrange(g1,g2,widths= 1:2, ncol=2)
+  
+```
+
+
+# Effects on recognition accuracy
+
+```{r effects_on_accuracy_logistic_regression}
+
+###--> NOTE: we look at a logistic regression model
+## - thus GLM logarithmizes binomial outcome variable to get a broader range (-inf, inf)
+## thus all coefficients are log odds values, in order to translate these to probability, use the following formula
+
+logit2prob <- function(logit){
+  odds <- exp(logit)
+  prob <- odds / (1 + odds)
+  return(prob)
+}
+
+    #scaling
+    df_trial_old$rpd_enc_scaled<-ifelse(scale(df_trial_old$rpd_enc)>3,NA,
+                                        ifelse(scale(df_trial_old$rpd_enc)<(-3),NA,
+                                               scale(df_trial_old$rpd_enc)))
+
+    df_trial_old$rpd_response_scaled<-ifelse(scale(df_trial_old$rpd_response)>3,NA,
+                                        ifelse(scale(df_trial_old$rpd_response)<(-3),NA,
+                                               scale(df_trial_old$rpd_response)))
+
+
+    ##logistic regression
+    model_lr<-glmer(Acc~rpd_enc_scaled*rpd_response_scaled*group+
+                      (1|PIC)+(1|stimulus),family= 'binomial',
+                    data = df_trial_old)
+    
+ 
+    
+
+    #plot table
+      model_lr_summary<-data.frame(round(summary(model_lr)[['coefficients']],3)) ###--> as table
+      row.names(model_lr_summary)<-c('intercept','EEPR (z)','SEPR (z)','group (TD)','EEPR x SEPR','EEPR x group','SEPR x group','EEPR x SEPR x group')
+      colnames(model_lr_summary)<-c('estimate','std error','z-value','p-value')
+      
+      table2<-model_lr_summary %>%
+          kbl(caption = "Table 2. Logistic regression: EEPR and SEPR effect on recognition accuracy") %>%
+          kable_classic(full_width = F, html_font = "Cambria")
+      
+      
+      save_kable(table2,file=paste0(path_to_project,'/output/table2_model_logistic_regression.pdf'))
+      
+      table2
+      
+         #effects
+    emtrends(model_lr,~rpd_enc_scaled|group,var='rpd_response_scaled',at=list(rpd_enc_scaled = c(-2,-1,0,1,2)))
+    confint(pmtrends(model_lr,~group,var='rpd_enc_scaled'))
+    confint(pmtrends(model_lr,~group,var='rpd_response_scaled'))
+      #--> no effect of SEPR if outliers are excluded
+          
+```
+
+# figure6: three-way-interaction
+
+```{r figure_effects_on_accuracy_posthoc, warning=FALSE, fig.height=4, fig.width=8}
+
+      model_plot<-as.data.frame(emtrends(model_lr,~rpd_enc_scaled|group,var='rpd_response_scaled',at=list(rpd_enc_scaled = c(-2,-1,0,1,2))))
+      g1<-ggplot(model_plot,aes(x=as.factor(rpd_enc_scaled)))+
+        geom_hline(yintercept = 0)+
+        geom_boxplot(aes(fill=group,
+                         middle=rpd_response_scaled.trend,
+                         lower=rpd_response_scaled.trend-SE,
+                         upper=rpd_response_scaled.trend+SE,
+                         ymin=asymp.LCL,
+                         ymax=asymp.UCL),stat = "identity")+
+        xlab('EEPR (z)')+ylab('SEPR effect (z)')+
+        theme_bw()
+
+
+tiff(filename = paste0(path_to_project,'/output/figure6_PDeffects_on_Acc.tiff'),
+           width = 8, height = 4, units = "in", pointsize = 12, res=300, compression="lzw") #define dimensions
+
+      g1
+      dev.off()
+
+
+      g1
+      
+    
+      #model_lmm<-lmer(rpd_response_scaled~rpd_enc_scaled*group+
+      #                  (1|PIC)+(1|stimulus),data = df_trial_old)
+      #summary(model_lmm)
+
+```
+
+
+# remember and not remembered items
+
+```{r remember_vs_notremember}
+
+# remembered<-with(df_trial_old,ifelse(oldnew == 'old' & Acc == 0,'not_remembered',ifelse(oldnew =='old' & Acc == 1,'remembered',NA)))
+# 
+# lm_model<-glmer(as.factor(remembered)~rpd_enc_scaled*group+rpd_response_scaled*group+(1|PIC)+(1|word),family= 'binomial',
+#                     data = df_trial_old)
+# 
+# summary(lm_model)
+# emtrends(lm_model,~group,var='rpd_response')
+#     
+# 
+# table(is.na(remembered))
+
+```
+
+
+# supplements: separate models on accuracy
+
+```{r effects_on_accuracy_separate_models}
+
+    ###-> split into two models
+    #ASD model:
+    model_lr<-glmer(Acc~scale(rpd_enc)+scale(rpd_response)+
+                      (1|PIC)+(1|stimulus),family= 'binomial',
+                    data = df_trial_old[df_trial_old$group=='ASD',])
+
+     model_lr_summary<-data.frame(round(summary(model_lr)[['coefficients']],3)) ###--> as table
+     row.names(model_lr_summary)<-c('intercept','EEPR','SEPR')
+     
+      table_supplements<-model_lr_summary %>%
+        kbl(caption = "logistic regression in ASD: EEPR and SEPR effect on recognition accuracy") %>%
+        kable_classic(full_width = F, html_font = "Cambria")
+
+      save_kable(table_supplements,file=paste0(path_to_project,'/output/supplements_table3.pdf'))
+      table_supplements
+      
+    #--> NOTE: LR coefficiens are LOG ODDS : log(acc/(1-acc)) --> convert to likelihood: exp(x)/(1+exp())
+    logit2prob(fixef(model_lr))
+    exp(fixef(model_lr))
+    confint(model_lr,parm='scale(rpd_enc)')
+    confint(model_lr,parm='scale(rpd_response)')
+  
+    #TD model
+    model_lr<-glmer(Acc~scale(rpd_enc)+scale(rpd_response)+
+                      (1|PIC)+(1|stimulus),family= 'binomial',
+                    data = df_trial_old[df_trial_old$group=='TD',])
+    
+    model_lr_summary<-data.frame(round(summary(model_lr)[['coefficients']],3)) ###--> as table
+    row.names(model_lr_summary)<-c('intercept','EEPR','SEPR')
+    
+    
+    table_supplements<-model_lr_summary %>%
+      kbl(caption = "logistic regression in TD: EEPR and SEPR effect on recognition accuracy") %>%
+      kable_classic(full_width = F, html_font = "Cambria")
+    
+    save_kable(table_supplements,file=paste0(path_to_project,'/output/supplements_table4.pdf'))
+      table_supplements
+
+    #--> NOTE: LR coefficiens are LOG ODDS : log(acc/(1-acc)) --> convert to likelihood: exp(x)/(1+exp())
+    logit2prob(fixef(model_lr))
+    exp(fixef(model_lr))
+    confint(model_lr,parm='scale(rpd_enc)')
+    confint(model_lr,parm='scale(rpd_response)')
+
+```
+
+# supplements: data distribution
+
+```{r distribution_PD}
+
+theme_set(theme_bw())
+
+grid.arrange(
+  ggplot(df_trial,aes(bps_enc_agg))+geom_histogram(bins=10)+xlab('BPS encoding'),
+  ggplot(df_trial,aes(bps_agg))+geom_histogram(bins=10)+xlab('BPS retrieval'),
+  ggplot(df_trial_old,aes(rpd_response))+geom_histogram(bins=20)+xlab('EEPR'),
+  ggplot(df_trial,aes(rpd_response))+geom_histogram(bins=20)+xlab('SEPR'),
+  nrow=2
+)
+
+```
+
+

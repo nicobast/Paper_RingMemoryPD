@@ -7,4 +7,15 @@ editor_options:
   chunk_output_type: console
 ---
 
-Describe your project.
+Elaborated reanalysis of [Ring et. al (2020)](https://doi.org/10.1002/aur.2251) with investigation of encoding and retreival pupillary responses and their effect on performance in per-trial linear mixed models.
+
+The paradigm includes stimuli (words, Non-words, objects, shapes; 10 items each) that learned in an encoding phase. In a retrieval phase, these stimuli are presented again (old) with stimuli not previoulsy shown (new). participants have to decide whether stimuli are OLD or NEW. Pupillometry is continouly tracked throughout.
+
+- available data sets: N = 32 ASD vs N = 32 TD
+- appartus: Tobii TX 300 
+
+comments on variables
+
+- TrialId (20 levels --> 20 for every word level)
+- word (4 levels --> should be regarded as TYPE: 1: word, 2: nonword, 3: picture, 4: shape
+- shape (40 level --> should be regarded as ITEM)
